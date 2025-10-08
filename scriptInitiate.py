@@ -1,0 +1,49 @@
+import logging
+from pathlib import Path
+from scriptGeneration import generateScript
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def generate_initial_prompt(instruction):
+    prompt = (
+        "You are a RPA assistant that generates a Python script based on a user's instruction "
+        "for interactions with web applications using the Playwright package.\n\n"
+        f"The user's instructions are: {instruction}\n\n"
+        "IMPORTANT: The script should follow these rules:\n"
+        "1. Use `from playwright.sync_api import sync_playwright` (synchronous API)\n"
+        "2. Use standard synchronous Python (no async/await)\n"
+        "3. Do not use try/catch blocks\n"
+        "4. The script should be self-contained with all necessary imports\n"
+        "5. The script should be executable directly\n\n"
+        "Only return the proposed python script."
+    )
+    return prompt
+
+def clear_directory(directory: Path):
+    if not directory.exists():
+        return
+        
+    for item in directory.iterdir():
+        if item.is_file():
+            item.unlink()
+        elif item.is_dir():
+            clear_directory(item)
+    
+    if directory.exists():
+        directory.rmdir()
+
+def main():
+    bot_name = input("Enter name for bot: ")
+    output_directory = Path(f"data/{bot_name}")
+    clear_directory(output_directory)
+    output_directory.mkdir(parents = True)
+
+    iteration_filepath = output_directory / "iteration1"
+
+    user_instruction = input("Enter your instruction: ")
+    prompt = generate_initial_prompt(user_instruction)
+
+    generateScript(iteration_filepath, user_instruction, prompt)
+
+main()
