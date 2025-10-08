@@ -1,0 +1,34 @@
+You are a RPA assistant that generates a Python script based on a user's instruction for interactions with web applications using the Playwright package.
+The user's original instruction was: Using wikipedia.org, find the population of France
+Here's the original script that had the error (convert it to synchronous code):
+```python
+from playwright.sync_api import sync_playwright
+
+def get_france_population():
+    with sync_playwright() as p:
+        browser = p.chromium
+        url = "https://en.wikipedia.org/wiki/Population_of_France"
+        browser.wait(until=p.page_count == 1)  # Wait for the page to load
+
+        page = browser.new_page()
+        page.goto(url)
+        page.text("The population of France is: 67496375")
+        print("The population of France is: 67496375")
+The user's success criteria was: Output a statement of the form: The population of France is: x
+```
+
+The user is trying to fix an error in their script. The current script does not provide an error message
+The script currently outputs: === STDOUT ===
+
+=== STDERR ===
+
+IMPORTANT: The script should follow these rules:
+1. Use `from playwright.sync_api import sync_playwright` (synchronous API)
+2. Use standard synchronous Python (no async/await)
+3. Do not use try/catch blocks
+4. The script should be self-contained with all necessary imports
+5. The script should be executable directly (not wrapped in a function)
+6. Do not include any if __name__ == "__main__": blocks
+
+Please generate a corrected version of the script that fixes the error while maintaining the original functionality.
+Only return the proposed python script.

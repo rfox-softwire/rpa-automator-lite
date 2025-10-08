@@ -5,17 +5,19 @@ from scriptGeneration import generateScript
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def generate_initial_prompt(instruction):
+def generate_initial_prompt(instruction, success_criteria):
     prompt = (
         "You are a RPA assistant that generates a Python script based on a user's instruction "
         "for interactions with web applications using the Playwright package.\n\n"
         f"The user's instructions are: {instruction}\n\n"
+        f"The resulting script should: {success_criteria}\n\n"
         "IMPORTANT: The script should follow these rules:\n"
         "1. Use `from playwright.sync_api import sync_playwright` (synchronous API)\n"
         "2. Use standard synchronous Python (no async/await)\n"
         "3. Do not use try/catch blocks\n"
         "4. The script should be self-contained with all necessary imports\n"
-        "5. The script should be executable directly\n\n"
+        "5. The script should be executable directly and not wrapped in a function\n"
+        "6. Do not include any if __name__ == \"__main__\": blocks\n\n"
         "Only return the proposed python script."
     )
     return prompt
@@ -42,8 +44,9 @@ def main():
     iteration_filepath = output_directory / "iteration1"
 
     user_instruction = input("Enter your instruction: ")
-    prompt = generate_initial_prompt(user_instruction)
+    success_criteria = input("Enter success criteria for instructions: ")
+    prompt = generate_initial_prompt(user_instruction, success_criteria)
 
-    generateScript(iteration_filepath, user_instruction, prompt)
+    generateScript(iteration_filepath, user_instruction, success_criteria, prompt)
 
 main()

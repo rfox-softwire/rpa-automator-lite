@@ -36,11 +36,19 @@ def generate_repair_prompt(files_content):
         "You are a RPA assistant that generates a Python script based on a user's instruction "
         "for interactions with web applications using the Playwright package.\n"
         f"The user's original instruction was: {files_content['instruction']}\n"
-        f"Here's the original script that had the error (convert it to synchronous code):\n```python\n{files_content['script']}\n```\n\n"
+        f"The user's success criteria was: {files_content['success_criteria']}\n"
+        f"Here's the original script that had the error:\n```python\n{files_content['script']}\n```\n\n"
     ]
-    if files_content['success_criteria']: prompt.append(f"The user's success criteria was: {files_content['success_criteria']}\n")
-    if files_content['error']: prompt.append(f"The user is trying to fix an error in their script. Here's the error that occurred {files_content['error']}\n")
-    if files_content['output']: prompt.append(f"The script currently outputs: {files_content['output']}\n")
+    
+    if files_content['error']:
+        prompt.append(f"The user is trying to fix an error in their script. Here's the error that occurred {files_content['error']}\n")
+    else:
+        prompt.append("The user is trying to fix an error in their script. The current script does not provide an error message\n")
+    
+    if files_content['output']:
+        prompt.append(f"The script currently outputs: {files_content['output']}\n")
+    else:
+        prompt.append("The script does not currently output anything")
 
     prompt.extend([
         "IMPORTANT: The script should follow these rules:\n"
@@ -48,7 +56,8 @@ def generate_repair_prompt(files_content):
         "2. Use standard synchronous Python (no async/await)\n"
         "3. Do not use try/catch blocks\n"
         "4. The script should be self-contained with all necessary imports\n"
-        "5. The script should be executable directly\n"
+        "5. The script should be executable directly (not wrapped in a function)\n"
+        "6. Do not include any if __name__ == \"__main__\": blocks\n\n"
         "Please generate a corrected version of the script that fixes the error while maintaining the original functionality.\n",
         "Only return the proposed python script."
     ])
@@ -59,17 +68,17 @@ def main():
     base_directory = Path(f"data/{bot_name}")
 
     base_path = Path(base_directory)
-    latest_iteration_number = len(base_path.iterdir())
+    latest_iteration_number = len([directories for directories in base_path.iterdir()])
 
     latest_iteration_directory = base_path / f"iteration{latest_iteration_number}"
     current_files = read_iteration_files(latest_iteration_directory)
 
     user_instruction = current_files["instruction"]
+    success_criteria = current_files["success_criteria"]
     new_iteration_filepath = base_path / f"iteration{latest_iteration_number + 1}"
-
 
     prompt = generate_repair_prompt(current_files)
 
-    generateScript(new_iteration_filepath, user_instruction, prompt)
+    generateScript(new_iteration_filepath, user_instruction, success_criteria, prompt)
 
 main()
