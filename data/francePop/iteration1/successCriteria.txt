@@ -1,0 +1,1 @@
+Prints a statement of the form: The population of France is

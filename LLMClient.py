@@ -11,15 +11,16 @@ logger = logging.getLogger(__name__)
 class LLMClient:
     def __init__(self):
         self.base_url = config["INFERENCE_SERVER_URL"]
-        self.model_name = config["MODEL_NAME_OPENAI"]
+        # self.model_name = config["MODEL_NAME_OPENAI"]
+        self.model_name = config["MODEL_NAME_GEMMA"]
 
-    def send_prompt(self, prompt, temperature=0.7, model_name=self.model_name):
+    def send_prompt(self, prompt, temperature=0.7):
         payload = {
-            "model": model_name,
+            "model": self.model_name,
             "messages": [{
                 "role": "user",
                 "content": prompt
-            }]
+            }],
             "max_tokens": -1,
             "temperature": temperature
         }

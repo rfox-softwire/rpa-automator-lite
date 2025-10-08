@@ -1,0 +1,2 @@
+=== STDOUT ===An error occurred while retrieving the population: 'Locator' object has no attribute 'get_text'
+=== STDERR ===
