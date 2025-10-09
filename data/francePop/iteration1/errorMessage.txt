@@ -1,0 +1,15 @@
+=== STDERR ===
+Exception in thread Thread-1:
+Traceback (most recent call last):
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\threading.py", line 1043, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\threading.py", line 1344, in run
+    self.function(*self.args, **self.kwargs)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Work\rpa-work\rpa-automator-lite\data\francePop\iteration1\script1.py", line 70, in timeout_handler
+    raise TimeoutError("Script execution timed out")
+TimeoutError: Script execution timed out
+
+=== TRACEBACK ===
+NoneType: None

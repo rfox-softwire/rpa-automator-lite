@@ -12,7 +12,8 @@ def read_iteration_files(iteration_dir):
         'instruction': None,
         'script': None,
         'error': None,
-        'success_criteria': None
+        'success_criteria': None,
+        'html': None
     }
     
     def read_if_exists(file_path):
@@ -28,6 +29,7 @@ def read_iteration_files(iteration_dir):
     files_content['script'] = read_if_exists(iteration_dir / 'scriptUnmodified.py')
     files_content['error'] = read_if_exists(iteration_dir / 'errorMessage.txt')
     files_content['success_criteria'] = read_if_exists(iteration_dir / 'successCriteria.txt')
+    files_content['html'] = read_if_exists(iteration_dir / 'HTML.txt')
     
     return files_content
 
@@ -49,6 +51,9 @@ def generate_repair_prompt(files_content):
         prompt.append(f"The script currently outputs: {files_content['output']}\n")
     else:
         prompt.append("The script does not currently output anything")
+
+    if files_content['html']:
+        prompt.append(f"Prior to failing its exectution, the page had the following HTML content:\n{files_content['html']}\n")
 
     prompt.extend([
         "IMPORTANT: The script should follow these rules:\n"

@@ -1,1 +1,1 @@
-Output a statement of the form: The population of France is: x
+Print a statement of the form: The population of France is x
