@@ -57,12 +57,11 @@ def generate_repair_prompt(files_content):
 
     prompt.extend([
         "IMPORTANT: The script should follow these rules:\n"
-        "1. Use `from playwright.sync_api import sync_playwright` (synchronous API)\n"
-        "2. Use standard synchronous Python (no async/await)\n"
-        "3. Do not use try/catch blocks\n"
-        "4. The script should be self-contained with all necessary imports\n"
-        "5. The script should be executable directly (not wrapped in a function)\n"
-        "6. Do not include any if __name__ == \"__main__\": blocks\n\n"
+        "1. Use asynchronous Playwright\n"
+        "2. Do not use try/catch blocks\n"
+        "3. The script should be self-contained with all necessary imports\n"
+        "4. The script should be executable directly and not wrapped in a function\n"
+        "5. Do not include any if __name__ == \"__main__\": blocks\n\n"
         "Please generate a corrected version of the script that fixes the error while maintaining the original functionality.\n",
         "Only return the proposed python script."
     ])

@@ -1,123 +1,141 @@
-from playwright.sync_api import sync_playwright
+
+import sys, os, asyncio, contextlib, atexit
 from pathlib import Path
-import traceback
-import sys
-import os
-from io import StringIO
-from contextlib import redirect_stdout, redirect_stderr
-import signal
-import _thread
+from playwright.async_api import async_playwright, Page, Locator, BrowserType, Browser, BrowserContext, TimeoutError as PWTimeoutError
 
+# --- Files next to the tracked script ---
+base_dir    = Path(__file__).parent
+output_file = base_dir / "output.txt"
+error_file  = base_dir / "errorMessage.txt"
+html_file   = base_dir / "HTML.txt"
 
-def main():
-    # Setup output and error tracking
-    output = StringIO()
-    error_output = StringIO()
-    sys.stdout = output
-    sys.stderr = error_output
-    output_file = Path(__file__).parent / "output.txt"
-    error_file = Path(__file__).parent / "errorMessage.txt"
-    html_file = Path(__file__).parent / "HTML.txt"
-    timeout_seconds = 30
+# overwrite logs each run
+sys.stdout = open(output_file, "w", encoding="utf-8")
+sys.stderr = open(error_file, "w", encoding="utf-8")
 
-    def save_page_html(page, html_file):
+@atexit.register
+def _flush_streams():
+    for s in (sys.stdout, sys.stderr):
         try:
-            content = page.content()
-            with open(html_file, "w", encoding="utf-8") as f:
-                f.write(content)
-        except Exception as e:
-            with open(html_file, "w", encoding="utf-8") as f:
-                f.write(f"Error saving HTML: {str(e)}")
-
-    def timeout_handler(signum, frame):
-        raise TimeoutError(f"Script execution timed out after {timeout_seconds} seconds")
-
-    # Set up timeout handler
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(timeout_seconds)
-
-    try:
-        def get_france_population():
-            with sync_playwright() as p:
-                browser = p.chromium.launch()
-                page = browser.new_page()
-                page.goto("https://www.wikipedia.org/")
-                # Search for France
-                page.locator("#searchInput").fill("France")
-                page.locator("#searchButton").click()
-                page.wait_for_load_state("networkidle")
-                # Navigate to the France article
-                try:
-                    page.locator('//a[contains(text(), "France")]').click()
-                    page.wait_for_load_state("networkidle")
-                except:
-                    print("Could not find France article link.")
-                    browser.close()
-                    return
-                # Extract the population from the infobox
-                try:
-                    population_text = page.locator("#infobox p:nth-child(6)").inner_text()
-                    population = int(population_text.split(" ")[0].replace(",", ""))
-                    print(f"The population of France is {population}")
-                except:
-                    print("Could not find population data.")
-                browser.close()
-        get_france_population()
-        # Save the final page HTML
-        if "page" in locals() and page is not None:
-            save_page_html(page, html_file)
-        
-        # Save output to file
-        with open(output_file, "w", encoding="utf-8") as f:
-            f.write(output.getvalue())
-        
-        # Save any errors
-        error_content = error_output.getvalue()
-        if error_content:
-            with open(error_file, "w", encoding="utf-8") as f:
-                f.write("=== STDERR ===\n")
-                f.write(error_content)
-                f.write("\n=== TRACEBACK ===\n")
-                f.write(traceback.format_exc())
-    
-    except TimeoutError as e:
-        # Handle timeout specifically
-        error_msg = f"\nERROR: {str(e)}\n"
-        with open(error_file, "w", encoding="utf-8") as f:
-            f.write(error_msg)
-        if "page" in locals() and page is not None:
-            save_page_html(page, html_file)
-        print(error_msg, file=sys.stderr, end="")
-        sys.exit(1)
-    
-    except Exception as e:
-        # Save any other errors
-        error_msg = f"\nERROR: {str(e)}\n{traceback.format_exc()}"
-        with open(error_file, "w", encoding="utf-8") as f:
-            f.write("=== ERROR ===\n")
-            f.write(error_msg)
-        if "page" in locals() and page is not None:
-            save_page_html(page, html_file)
-        print(error_msg, file=sys.stderr, end="")
-        sys.exit(1)
-    
-    finally:
-        # Ensure alarm is always disabled
-        try:
-            signal.alarm(0)
-        except:
+            s.flush()
+            s.close()
+        except Exception:
             pass
-        
-        # Restore stdout/stderr
-        sys.stdout = sys.__stdout__
-        sys.stderr = sys.__stderr__
-        
-        # Make sure browser is closed
-        if "browser" in locals():
-            try:
-                browser.close()
-            except:
-                pass
+
+async def _save_html(page: "Page"):
+    try:
+        html = await page.content()
+        html_file.write_text(html, encoding="utf-8")
+    except Exception as e:
+        print(f"[tracking] Failed to save HTML: {e!r}", file=sys.stderr)
+
+def _wrap_page_method(name: str):
+    orig = getattr(Page, name)
+    async def wrapper(self: "Page", *args, **kwargs):
+        timeout_s = 10
+        try:
+            return await asyncio.wait_for(orig(self, *args, **kwargs), timeout=timeout_s)
+        except (asyncio.TimeoutError, PWTimeoutError):
+            await _save_html(self)
+            raise
+    return wrapper
+
+def _wrap_locator_method(name: str):
+    orig = getattr(Locator, name)
+    async def wrapper(self: "Locator", *args, **kwargs):
+        timeout_s = 10
+        # best-effort to find page for snapshot
+        page = None
+        try:
+            page = getattr(self, "page", None)
+        except Exception:
+            page = None
+        try:
+            return await asyncio.wait_for(orig(self, *args, **kwargs), timeout=timeout_s)
+        except (asyncio.TimeoutError, PWTimeoutError):
+            if page is not None:
+                await _save_html(page)
+            else:
+                print("[tracking] Timeout on Locator but no page reference; HTML not saved.", file=sys.stderr)
+            raise
+    return wrapper
+
+# --- Install wrappers once ---
+if not getattr(Page, "__tracked_patched__", False):
+    # Page methods (high-impact)
+    if hasattr(Page, "goto"):
+        Page.goto = _wrap_page_method("goto")
+    if hasattr(Page, "wait_for_load_state"):
+        Page.wait_for_load_state = _wrap_page_method("wait_for_load_state")
+    if hasattr(Page, "wait_for_selector"):
+        Page.wait_for_selector = _wrap_page_method("wait_for_selector")
+    if hasattr(Page, "wait_for_url"):
+        Page.wait_for_url = _wrap_page_method("wait_for_url")
+    if hasattr(Page, "click"):
+        Page.click = _wrap_page_method("click")
+
+    # Locator methods (add the two common reads)
+    if hasattr(Locator, "wait_for"):
+        Locator.wait_for = _wrap_locator_method("wait_for")
+    if hasattr(Locator, "click"):
+        Locator.click = _wrap_locator_method("click")
+    if hasattr(Locator, "inner_text"):
+        Locator.inner_text = _wrap_locator_method("inner_text")
+    if hasattr(Locator, "text_content"):
+        Locator.text_content = _wrap_locator_method("text_content")
+
+    Page.__tracked_patched__ = True
+
+# --- Force headed by default ---
+_orig_launch = BrowserType.launch
+async def _launch_headed(self, *args, **kwargs):
+    kwargs["headless"] = False
+    browser: Browser = await _orig_launch(self, *args, **kwargs)
+
+    # ensure every context/page inherits your timeout as default
+    _orig_new_context = browser.new_context
+    async def _new_context(*aa, **kk):
+        ctx: BrowserContext = await _orig_new_context(*aa, **kk)
+        ctx.set_default_timeout(10000)
+        ctx.set_default_navigation_timeout(10000)
+        return ctx
+    browser.new_context = _new_context
+
+    # when scripts call browser.new_page() directly (like your sample), set page defaults
+    _orig_new_page = browser.new_page
+    async def _new_page(*aa, **kk):
+        page = await _orig_new_page(*aa, **kk)
+        page.set_default_timeout(10000)
+        page.set_default_navigation_timeout(10000)
+        return page
+    browser.new_page = _new_page
+
+    return browser
+BrowserType.launch = _launch_headed
+
+
+
+async def main():
+    url = "https://www.wikipedia.org/"
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
+        await page.goto(url)
+        await page.locator("text=Search Wikipedia").click()
+        await page.locator("#searchInput").fill("France")
+        await page.locator("#searchButton").click()
+        await page.locator("h2:has-text('Demographics')").click()
+        population_locator = page.locator("//div[@id='Population']//span[contains(.,'people')]")
+
+        try:
+            population_text = await population_locator.inner_text()
+            population = int(population_text.split(" ")[0].replace(",", ""))
+            print(f"The population of France is {population}")
+        except AttributeError:
+            print("Could not find the population.")
+        finally:
+            await browser.close()
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())

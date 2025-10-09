@@ -1,235 +1,148 @@
+from __future__ import annotations
+
+import os
+import re
 from pathlib import Path
 
-def create_tracked_script(original_script_path, output_script_path, timeout_seconds=30):
+def generate_prelude(timeout_seconds):
+    return f"""
+import sys, os, asyncio, contextlib, atexit
+from pathlib import Path
+from playwright.async_api import async_playwright, Page, Locator, BrowserType, Browser, BrowserContext, TimeoutError as PWTimeoutError
+
+# --- Files next to the tracked script ---
+base_dir    = Path(__file__).parent
+output_file = base_dir / "output.txt"
+error_file  = base_dir / "errorMessage.txt"
+html_file   = base_dir / "HTML.txt"
+
+# overwrite logs each run
+sys.stdout = open(output_file, "w", encoding="utf-8")
+sys.stderr = open(error_file, "w", encoding="utf-8")
+
+@atexit.register
+def _flush_streams():
+    for s in (sys.stdout, sys.stderr):
+        try:
+            s.flush()
+            s.close()
+        except Exception:
+            pass
+
+async def _save_html(page: "Page"):
+    try:
+        html = await page.content()
+        html_file.write_text(html, encoding="utf-8")
+    except Exception as e:
+        print(f"[tracking] Failed to save HTML: {{e!r}}", file=sys.stderr)
+
+def _wrap_page_method(name: str):
+    orig = getattr(Page, name)
+    async def wrapper(self: "Page", *args, **kwargs):
+        timeout_s = {timeout_seconds}
+        try:
+            return await asyncio.wait_for(orig(self, *args, **kwargs), timeout=timeout_s)
+        except (asyncio.TimeoutError, PWTimeoutError):
+            await _save_html(self)
+            raise
+    return wrapper
+
+def _wrap_locator_method(name: str):
+    orig = getattr(Locator, name)
+    async def wrapper(self: "Locator", *args, **kwargs):
+        timeout_s = {timeout_seconds}
+        # best-effort to find page for snapshot
+        page = None
+        try:
+            page = getattr(self, "page", None)
+        except Exception:
+            page = None
+        try:
+            return await asyncio.wait_for(orig(self, *args, **kwargs), timeout=timeout_s)
+        except (asyncio.TimeoutError, PWTimeoutError):
+            if page is not None:
+                await _save_html(page)
+            else:
+                print("[tracking] Timeout on Locator but no page reference; HTML not saved.", file=sys.stderr)
+            raise
+    return wrapper
+
+# --- Install wrappers once ---
+if not getattr(Page, "__tracked_patched__", False):
+    # Page methods (high-impact)
+    if hasattr(Page, "goto"):
+        Page.goto = _wrap_page_method("goto")
+    if hasattr(Page, "wait_for_load_state"):
+        Page.wait_for_load_state = _wrap_page_method("wait_for_load_state")
+    if hasattr(Page, "wait_for_selector"):
+        Page.wait_for_selector = _wrap_page_method("wait_for_selector")
+    if hasattr(Page, "wait_for_url"):
+        Page.wait_for_url = _wrap_page_method("wait_for_url")
+    if hasattr(Page, "click"):
+        Page.click = _wrap_page_method("click")
+
+    # Locator methods (add the two common reads)
+    if hasattr(Locator, "wait_for"):
+        Locator.wait_for = _wrap_locator_method("wait_for")
+    if hasattr(Locator, "click"):
+        Locator.click = _wrap_locator_method("click")
+    if hasattr(Locator, "inner_text"):
+        Locator.inner_text = _wrap_locator_method("inner_text")
+    if hasattr(Locator, "text_content"):
+        Locator.text_content = _wrap_locator_method("text_content")
+
+    Page.__tracked_patched__ = True
+
+# --- Force headed by default ---
+_orig_launch = BrowserType.launch
+async def _launch_headed(self, *args, **kwargs):
+    kwargs["headless"] = False
+    browser: Browser = await _orig_launch(self, *args, **kwargs)
+
+    # ensure every context/page inherits your timeout as default
+    _orig_new_context = browser.new_context
+    async def _new_context(*aa, **kk):
+        ctx: BrowserContext = await _orig_new_context(*aa, **kk)
+        ctx.set_default_timeout({int(timeout_seconds*1000)})
+        ctx.set_default_navigation_timeout({int(timeout_seconds*1000)})
+        return ctx
+    browser.new_context = _new_context
+
+    # when scripts call browser.new_page() directly (like your sample), set page defaults
+    _orig_new_page = browser.new_page
+    async def _new_page(*aa, **kk):
+        page = await _orig_new_page(*aa, **kk)
+        page.set_default_timeout({int(timeout_seconds*1000)})
+        page.set_default_navigation_timeout({int(timeout_seconds*1000)})
+        return page
+    browser.new_page = _new_page
+
+    return browser
+BrowserType.launch = _launch_headed
+"""
+
+def strip_async_playwright_imports(content):
+    """
+    Remove lines like:
+      from playwright.async_api import async_playwright
+      from playwright.async_api import async_playwright as ap
+      from playwright.async_api import async_playwright, Page
+    (We remove the whole line if it imports async_playwright at all.)
+    """
+    pattern = r'^[ \t]*from[ \t]+playwright\.async_api[ \t]+import[ \t]+.*\basync_playwright\b.*$'
+    return re.sub(pattern, "", content, flags=re.MULTILINE)
+
+def create_tracked_script(original_script_path, output_script_path, timeout_seconds=10):
     with open(original_script_path, 'r', encoding='utf-8') as f:
         original_content = f.read()
-    
-    original_lines = original_content.splitlines()
-    
-    # Find where to insert our tracking imports
-    import_index = 0
-    for i, line in enumerate(original_lines):
-        if line.startswith(('import ', 'from ')):
-            import_index = i + 1
-        elif line.strip() and not line.startswith(('def ', 'class ')):
-            break
-    
-    tracking_imports = [
-        'from pathlib import Path',
-        'import traceback',
-        'import sys',
-        'import os',
-        'from io import StringIO',
-        'from contextlib import redirect_stdout, redirect_stderr',
-        'import threading',
-        'from queue import Queue',
-        'import time',
-        'import ctypes',
-        ''
-    ]
-    
-    # Insert imports after the first import block
-    modified_lines = (original_lines[:import_index] + 
-                     tracking_imports + 
-                     original_lines[import_index:])
-    
-    # Find the start of the main code (after imports and function definitions)
-    code_start = 0
-    for i, line in enumerate(modified_lines):
-        line = line.strip()
-        if line and not (line.startswith('import ') or line.startswith('from ') or 
-                        line.startswith('def ') or line.startswith('class ')):
-            code_start = i - 1
-            break
-    
-    # Prepare the tracking code to insert at the beginning of the main code
-    tracking_code = [
-        'def main():',
-        '    # Debug information',
-        '    print("Script started")',
-        '    print(f"Working directory: {os.getcwd()}")',
-        '    print(f"Script location: {__file__}")',
-        '',
-        '    # Setup output and error tracking',
-        '    output = StringIO()',
-        '    error_output = StringIO()',
-        '    sys.stdout = output',
-        '    sys.stderr = error_output',
-        '    output_file = Path(__file__).parent / "output.txt"',
-        '    error_file = Path(__file__).parent / "errorMessage.txt"',
-        '    html_file = Path(__file__).parent / "HTML.txt"',
-        '    timeout_seconds = ' + str(timeout_seconds),
-        '    page = None  # Initialize page variable',
-        '    browser = None  # Initialize browser variable',
-        '    playwright = None  # Initialize playwright instance',
-        '',
-        '    def save_page_html(page, html_file):',
-        '        try:',
-        '            if page and not page.is_closed():',
-        '                content = page.content()',
-        '                with open(html_file, "w", encoding="utf-8") as f:',
-        '                    f.write(content)',
-        '        except Exception as e:',
-        '            with open(html_file, "w", encoding="utf-8") as f:',
-        '                f.write(f"Error saving HTML: {str(e)}")',
-        '',
-        '    def save_outputs():',
-        '        try:',
-        '            # Ensure directory exists',
-        '            output_dir = Path(__file__).parent',
-        '            output_dir.mkdir(parents=True, exist_ok=True)',
-        '            ',
-        '            # Save standard output',
-        '            with open(output_file, "w", encoding="utf-8") as f:',
-        '                f.write(output.getvalue())',
-        '            ',
-        '            # Save errors if any',
-        '            error_content = error_output.getvalue()',
-        '            if error_content:',
-        '                with open(error_file, "w", encoding="utf-8") as f:',
-        '                    f.write("=== STDERR ===\\n")',
-        '                    f.write(error_content)',
-        '                    f.write("\\n=== TRACEBACK ===\\n")',
-        '                    f.write(traceback.format_exc())',
-        '        except Exception as e:',
-        '            print(f"Error saving outputs: {str(e)}", file=sys.stderr)',
-        '',
-        '    timed_out = False',
-        '',
-        '    def timeout_handler():',
-        '        nonlocal timed_out',
-        '        timed_out = True',
-        '        # Raise an exception to break out of any ongoing operations',
-        '        raise TimeoutError("Script execution timed out")',
-        '',
-        '    # Set up timer for Windows',
-        '    timer = threading.Timer(timeout_seconds, timeout_handler)',
-        '    timer.daemon = True',
-        '    timer.start()',
-        '',
-        '    try:',
-        '        # Initialize Playwright and browser',
-        '        print("Initializing Playwright...")',
-        '        playwright = sync_playwright().start()',
-        '        print("Launching browser...")',
-        '        browser = playwright.chromium.launch(headless=False)',
-        '        print("Creating new page...")',
-        '        page = browser.new_page()',
-        '        script_content = []',
-        '        in_function = False',
-    ]
 
-    # Prepare the code to insert at the end of the main code
-    end_code = [
-        '    except TimeoutError as e:',
-        '        print(f"\\nERROR: {str(e)}", file=sys.stderr)',
-        '    except Exception as e:',
-        '        if not timed_out:  # Only handle if not a timeout',
-        '            error_msg = f"\\nERROR: {str(e)}\\n{traceback.format_exc()}"',
-        '            print(error_msg, file=sys.stderr)',
-        '    ',
-        '    # Always try to save HTML if we have a page',
-        '    try:',
-        '        if page is not None and not page.is_closed():',
-        '            save_page_html(page, html_file)',
-        '    except Exception as e:',
-        '        error_msg = f"Error saving page HTML: {str(e)}\\n"',
-        '        error_output.write(error_msg)',
-        '    ',
-        '    # Save outputs (including any error messages)',
-        '    try:',
-        '        save_outputs()',
-        '    except Exception as e:',
-        '        print(f"Error saving outputs: {str(e)}", file=sys.stderr)',
-        '    ',
-        '    # Cleanup resources',
-        '    try:',
-        '        timer.cancel()  # Cancel the timer if it\'s still running',
-        '    except:',
-        '        pass',
-        '        ',
-        '    if browser is not None:',
-        '        try:',
-        '            browser.close()',
-        '        except:',
-        '            pass',
-        '    if playwright is not None:',
-        '        try:',
-        '            playwright.stop()',
-        '        except:',
-        '            pass',
-        '    ',
-        '    # Restore stdout/stderr',
-        '    sys.stdout = sys.__stdout__',
-        '    sys.stderr = sys.__stderr__',
-        '    ',
-        '    # Exit with error if we timed out',
-        '    if timed_out:',
-        '        sys.exit(1)',
-        '',
-        'if __name__ == "__main__":',
-        '    main()',
-        ''
-    ]
+    original_content = strip_async_playwright_imports(original_content)
     
-    # Start building the final script
-    final_script = []
-    
-    # 1. Add original imports and function definitions
-    final_script.extend(modified_lines[:code_start])
-    
-    # 2. Add tracking code (main function definition)
-    final_script.extend(tracking_code)
-    
-    # 3. Add the original code with proper indentation and modify Playwright usage
-    in_function = False
-    current_indent = 0
-    for line in modified_lines[code_start:]:
-        line = line.rstrip()
-        
-        # Skip main function call if present
-        if line.strip() in ('if __name__ == "__main__":', 'main()'):
-            continue
-            
-        # Get the current line's indentation level
-        line_indent = len(line) - len(line.lstrip())
-        
-        # Track function definitions
-        if line.strip().startswith('def '):
-            in_function = True
-            # Add the function definition with proper indentation
-            final_script.append('        ' + line)
-            # Track the base indentation of this function
-            current_indent = line_indent
-            continue
+    parts = []
+    parts.append(generate_prelude(timeout_seconds))
+    parts.append(original_content)
 
-        # Check if we've exited the function's indentation level
-        if in_function and line_indent <= current_indent and line.strip() and not line.strip().startswith(('def ', 'class ')):
-            in_function = False
-            current_indent = line_indent
-            
-        # Inside functions, modify Playwright usage
-        if in_function and line.strip():
-            # Skip nested Playwright initialization
-            if not any(phrase in line for phrase in [
-                'sync_playwright()', 
-                'p.chromium', 
-                'playwright.chromium',
-                'browser = ',
-                'page = browser.new_page()',
-                'browser.close()'
-            ]):
-                # Add the line with proper indentation (8 spaces for main() + original indentation)
-                final_script.append(' ' * (4 + line_indent - current_indent) + line.lstrip())
-        else:
-            # For non-function code, maintain the original indentation but ensure it's at least at the main() indentation level
-            if line.strip():
-                # Preserve the original indentation, but ensure it's at least at the main() level
-                final_script.append((' ' * (8 + line_indent - current_indent)) + line.lstrip())
+    final_script = "\n".join(parts)
 
-    # 4. Add the end code (rest of main function and main call)
-    final_script.extend(end_code)
-    
-    # Write the final script
     with open(output_script_path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(final_script))
+        f.write(final_script)

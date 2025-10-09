@@ -1,34 +1,26 @@
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
 
-def get_france_population():
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page()
-        page.goto("https://www.wikipedia.org/")
+async def main():
+    url = "https://www.wikipedia.org/"
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
+        await page.goto(url)
+        await page.locator("text=Search Wikipedia").click()
+        await page.locator("#searchInput").fill("France")
+        await page.locator("#searchButton").click()
+        await page.locator("h2:has-text('Demographics')").click()
+        population_locator = page.locator("//div[@id='Population']//span[contains(.,'people')]")
 
-        # Search for France
-        page.locator("#searchInput").fill("France")
-        page.locator("#searchButton").click()
-        page.wait_for_load_state("networkidle")
-
-        # Navigate to the France article
         try:
-            page.locator('//a[contains(text(), "France")]').click()
-            page.wait_for_load_state("networkidle")
-        except:
-            print("Could not find France article link.")
-            browser.close()
-            return
-
-        # Extract the population from the infobox
-        try:
-            population_text = page.locator("#infobox p:nth-child(6)").inner_text()
+            population_text = await population_locator.inner_text()
             population = int(population_text.split(" ")[0].replace(",", ""))
             print(f"The population of France is {population}")
-        except:
-            print("Could not find population data.")
+        except AttributeError:
+            print("Could not find the population.")
+        finally:
+            await browser.close()
 
-        browser.close()
-
-
-get_france_population()
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

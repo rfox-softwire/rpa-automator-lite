@@ -5,11 +5,10 @@ The user's instructions are: Starting at https://www.wikipedia.org/, find the po
 The resulting script should: Print a statement of the form: The population of France is x
 
 IMPORTANT: The script should follow these rules:
-1. Use `from playwright.sync_api import sync_playwright` (synchronous API)
-2. Use standard synchronous Python (no async/await)
-3. Do not use try/catch blocks
-4. The script should be self-contained with all necessary imports
-5. The script should be executable directly and not wrapped in a function
-6. Do not include any if __name__ == "__main__": blocks
+1. Use asynchronous Playwright
+2. Do not use try/catch blocks
+3. The script should be self-contained with all necessary imports
+4. The script should be executable directly and not wrapped in a function
+5. Do not include any if __name__ == "__main__": blocks
 
 Only return the proposed python script.
