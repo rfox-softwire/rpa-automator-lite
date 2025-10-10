@@ -1,202 +1,215 @@
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString, Tag
 import re
+from copy import deepcopy
 
-def summarise_html(html_content, max_length=3000):
-    soup = BeautifulSoup(html_content, 'html.parser')
-    
-    # Remove script, style, and other non-essential elements
-    for element in soup(["script", "style", "noscript", "svg", "img", "meta", "link"]):
-        element.decompose()
-    
-    # Find all interactive elements
-    interactive_elements = {
-        'forms': [],
-        'buttons': [],
-        'inputs': [],
-        'tables': [],
-        'nav_menus': [],
-        'important_links': []
-    }
-    
-    # Extract forms and their inputs
-    for form in soup.find_all('form'):
-        form_data = {
-            'id': form.get('id', ''),
-            'class': form.get('class', []),
-            'action': form.get('action', ''),
-            'method': form.get('method', ''),
-            'inputs': []
-        }
-        for inp in form.find_all(['input', 'select', 'textarea', 'button']):
-            form_data['inputs'].append({
-                'tag': inp.name,
-                'type': inp.get('type', ''),
-                'name': inp.get('name', ''),
-                'id': inp.get('id', ''),
-                'class': inp.get('class', []),
-                'placeholder': inp.get('placeholder', '')
-            })
-        interactive_elements['forms'].append(form_data)
-    
-    # Find all buttons (including those not in forms)
-    for btn in soup.find_all('button'):
-        interactive_elements['buttons'].append({
-            'text': btn.get_text(strip=True),
-            'id': btn.get('id', ''),
-            'class': btn.get('class', []),
-            'type': btn.get('type', '')
-        })
-    
-    # Find all input elements not in forms
-    for inp in soup.find_all('input'):
-        if not inp.find_parent('form'):
-            interactive_elements['inputs'].append({
-                'tag': 'input',
-                'type': inp.get('type', ''),
-                'name': inp.get('name', ''),
-                'id': inp.get('id', ''),
-                'class': inp.get('class', []),
-                'placeholder': inp.get('placeholder', '')
-            })
-    
-    # Extract tables and their structure
-    for table in soup.find_all('table'):
-        table_data = {
-            'id': table.get('id', ''),
-            'class': table.get('class', []),
-            'headers': [],
-            'rows': []
-        }
-        
-        # Get headers (th elements)
-        headers = table.find_all('th')
-        if headers:
-            table_data['headers'] = [h.get_text(strip=True) for h in headers]
-        else:
-            # If no th elements, use first row of td elements as headers
-            first_row = table.find('tr')
-            if first_row:
-                table_data['headers'] = [cell.get_text(strip=True) for cell in first_row.find_all(['td', 'th'])]
-        
-        # Get table rows
-        rows = table.find_all('tr')
-        for row in rows:
-            # Skip header row if it was used for headers
-            if row.find('th') and not table_data['headers']:
+# -----------------------------
+# Helpers for HTML minimisation
+# -----------------------------
+
+# Attribute whitelist by tag (keep semantics; drop styling/noise). 'class' is always preserved; 'style' is always removed.
+_ATTRS = {
+    "table": {"role", "aria-label", "summary"},
+    "caption": set(),
+    "thead": set(),
+    "tbody": set(),
+    "tfoot": set(),
+    "tr": {"role"},
+    "th": {"scope", "colspan", "rowspan", "abbr", "headers"},
+    "td": {"colspan", "rowspan", "headers"},
+    "a": {"href", "title"},
+}
+
+def _strip_attrs(tag):
+    # Always drop inline styles
+    if "style" in tag.attrs:
+        del tag.attrs["style"]
+    keep = _ATTRS.get(tag.name, set())
+    # Always preserve 'class' (semantic grouping), plus any whitelisted attrs
+    for attr in list(tag.attrs):
+        if attr == "class":
+            continue
+        if attr not in keep:
+            del tag.attrs[attr]
+
+def _minify_within_cell(node):
+    """
+    Keep links (a[href]) and basic inline semantics (b/strong/em/code).
+    Drop spans/divs/styles/scripts. Replace nested blocks with their text.
+    """
+    for el in list(node.descendants):
+        if not isinstance(el, Tag) or not el.name:
+            continue
+        name = el.name.lower()
+        if name in {"script", "style", "svg"}:
+            el.decompose()
+            continue
+        if name in {"span", "div"}:
+            el.unwrap()  # keep text but drop tag
+            continue
+        if name == "a":
+            # Keep only href + text
+            _strip_attrs(el)
+            continue
+        if name in {"strong", "b", "em", "i", "code"}:
+            # keep tag but drop attributes
+            el.attrs = {}
+            continue
+        if name == "img":
+            # Keep only small/meaningful alt; replace big images with alt text
+            alt = el.get("alt", "")
+            if len(alt) <= 120:
+                _strip_attrs(el)
+            else:
+                el.replace_with(alt)
+
+def _table_visible_text(table):
+    """Return TSV-like visible text for a table."""
+    rows = []
+    for tr in table.find_all("tr"):
+        cells = tr.find_all(["th", "td"])
+        if not cells:
+            continue
+        vals = []
+        for c in cells:
+            t = " ".join(c.get_text(" ", strip=True).split())
+            vals.append(t)
+        rows.append("\t".join(vals))
+    return "\n".join(rows)
+
+def _minify_table_html(inTable):
+    """
+    Produce a compact, semantic-preserving HTML for a table:
+      - keep caption/thead structure
+      - strip non-semantic attributes
+      - simplify cell contents (unwrap spans/divs, keep links and basic inline tags)
+    """
+    table = deepcopy(inTable)  # operate on a clone
+    for el in table.find_all(["script", "style", "noscript", "svg"]):
+        el.decompose()
+
+    # Walk and strip attributes
+    for tag in table.find_all(True):
+        _strip_attrs(tag)
+        if tag.name in {"th", "td"}:
+            _minify_within_cell(tag)
+
+    # Collapse whitespace in text nodes
+    for text in table.find_all(string=True):
+        if isinstance(text, NavigableString):
+            # Keep whitespace in <pre> as-is
+            if text.parent and text.parent.name == "pre":
                 continue
-                
-            cells = row.find_all('td')
-            if cells:  # Only add rows with data cells
-                row_data = {
-                    'cells': [cell.get_text(strip=True) for cell in cells],
-                    'rowspan': [int(cell.get('rowspan', 1)) for cell in cells],
-                    'colspan': [int(cell.get('colspan', 1)) for cell in cells]
-                }
-                table_data['rows'].append(row_data)
-        
-        if table_data['headers'] or table_data['rows']:
-            interactive_elements['tables'].append(table_data)
+            text.replace_with(" ".join(str(text).split()))
 
-    # Find navigation menus (common nav patterns)
-    for nav in soup.find_all(['nav', 'ul', 'div'], class_=re.compile(r'nav|menu', re.I)):
+    return str(table)
+
+# -----------------------------
+# Main summariser
+# -----------------------------
+
+def summarise_html(html_content: str, max_length: int = 8000) -> str:
+    """
+    Summarise key interactive parts of an HTML page, preferring original HTML.
+    Order: forms, buttons, tables, nav menus, links.
+
+    Tables strategy to respect tight budgets while retaining HTML:
+      1) Try MINIFIED HTML for the first table (not raw outerHTML).
+      2) If still over budget, degrade to CAPTION+THEAD only (minified).
+      3) If still over, degrade to TSV text (inside <pre>).
+      4) For subsequent tables, include only TSV text (<pre>) to save space.
+
+    Other sections keep original outerHTML (with budget checks).
+    """
+    soup = BeautifulSoup(html_content, "html.parser")
+
+    # Remove global noise
+    for el in soup(["script", "style", "noscript", "svg"]):
+        el.decompose()
+
+    parts: list[str] = []
+    budget = max_length
+
+    def add(label: str, content: str, force: bool = False) -> bool:
+        nonlocal budget
+        if not content:
+            return True
+        block = f"\n<!-- {label} -->\n{content}\n"
+        if force or len(block) <= budget:
+            parts.append(block)
+            budget -= len(block)
+            return True
+        return False
+
+    # -------- FORMS --------
+    for form in soup.find_all("form"):
+        if not add("form", str(form)):
+            break
+
+    # -------- BUTTONS (unique) --------
+    seen_btn = set()
+    for btn in soup.find_all("button"):
+        h = str(btn).strip()
+        if h and h not in seen_btn:
+            if not add("button", h):
+                break
+            seen_btn.add(h)
+
+    # -------- TABLES --------
+    tables = soup.find_all("table")
+    if tables:
+        # First table: try a minified HTML version first
+        t0 = deepcopy(tables[0])
+        min_html = _minify_table_html(t0)
+        if len(min_html) <= budget or budget == max_length:  # allow first block to lead
+            if not add("table (minified HTML)", min_html, force=len(min_html) > budget):
+                # shouldn't happen because of force, but keep safe
+                pass
+        else:
+            # If even minified is too big, try caption+thead only
+            t_head_only = deepcopy(t0)
+            for node in t_head_only.find_all(True):
+                if node.name not in {"table", "caption", "thead", "tr", "th"}:
+                    node.decompose()
+            head_min = _minify_table_html(t_head_only)
+            if not add("table (caption+thead)", head_min):
+                # Last resort: TSV
+                tsv = _table_visible_text(t0)
+                add("table (text only)", f"<pre>{tsv}</pre>", force=True)
+
+        # Subsequent tables → TSV only
+        for t in tables[1:]:
+            tsv = _table_visible_text(t)
+            if not add("table (text only)", f"<pre>{tsv}</pre>"):
+                break
+
+    # -------- NAV MENUS --------
+    nav_candidates = soup.find_all(["nav"])
+    nav_candidates += soup.find_all(["ul", "div"], class_=re.compile(r"(nav|menu)", re.I))
+    seen_nav = set()
+    for nav in nav_candidates:
+        h = str(nav).strip()
+        if h and h not in seen_nav:
+            if not add("nav", h):
+                break
+            seen_nav.add(h)
+
+    # -------- LINKS --------
+    for section_tag in ["header", "footer", "main", "article", "section", "aside"]:
+        section = soup.find(section_tag)
+        if not section:
+            continue
         links = []
-        for a in nav.find_all('a', href=True):
-            links.append({
-                'text': a.get_text(strip=True),
-                'href': a['href'],
-                'class': a.get('class', [])
-            })
+        for a in section.find_all("a", href=True):
+            if a.get_text(strip=True):
+                links.append(str(a))
         if links:
-            interactive_elements['nav_menus'].append({
-                'element': nav.name,
-                'class': nav.get('class', []),
-                'id': nav.get('id', ''),
-                'links': links
-            })
-    
-    # Find other important links (header, footer, etc.)
-    for section in ['header', 'footer', 'main', 'article', 'section', 'aside']:
-        section_el = soup.find(section)
-        if section_el:
-            links = []
-            for a in section_el.find_all('a', href=True):
-                if a.get_text(strip=True):
-                    links.append({
-                        'text': a.get_text(strip=True),
-                        'href': a['href'],
-                        'class': a.get('class', [])
-                    })
-            if links:
-                interactive_elements['important_links'].append({
-                    'section': section,
-                    'links': links
-                })
-    
-    # Convert to a structured text representation
-    summary = f"# Page Structure Summary\n\n"
-    
-    if interactive_elements['forms']:
-        summary += "## Forms\n"
-        for i, form in enumerate(interactive_elements['forms'], 1):
-            summary += f"\n### Form {i}\n"
-            if form['id']:
-                summary += f"- ID: {form['id']}\n"
-            if form['action']:
-                summary += f"- Action: {form['action']}\n"
-            if form['inputs']:
-                summary += "  Inputs:\n"
-                for inp in form['inputs']:
-                    summary += f"  - {inp['tag']}"
-                    if inp['type']:
-                        summary += f" (type: {inp['type']})"
-                    if inp['name']:
-                        summary += f" [name: {inp['name']}]"
-                    if inp['id']:
-                        summary += f" [id: {inp['id']}]"
-                    summary += "\n"
-    
-    if interactive_elements['buttons']:
-        summary += "\n## Buttons\n"
-        for btn in interactive_elements['buttons']:
-            if btn['text']:  # Only include buttons with visible text
-                summary += f"- {btn['text']}"
-                if btn['id']:
-                    summary += f" [id: {btn['id']}]"
-                summary += "\n"
-    
-    if interactive_elements['tables']:
-        summary += "\n## Tables\n"
-        for i, table in enumerate(interactive_elements['tables'], 1):
-            summary += f"\n### Table {i}\n"
-            if table['id']:
-                summary += f"- ID: {table['id']}\n"
-            
-            if table['headers']:
-                summary += "  Headers: " + " | ".join(table['headers']) + "\n"
-            
-            if table['rows']:
-                summary += "  Rows:\n"
-                for row in table['rows'][:10]:  # Limit to first 10 rows to save space
-                    summary += "  - " + " | ".join(cell for cell in row['cells']) + "\n"
-                if len(table['rows']) > 10:
-                    summary += f"  - ... and {len(table['rows']) - 10} more rows\n"
-    
-    if interactive_elements['nav_menus']:
-        summary += "\n## Navigation Menus\n"
-        for i, menu in enumerate(interactive_elements['nav_menus'], 1):
-            summary += f"\n### Menu {i}\n"
-            for link in menu['links']:
-                summary += f"- {link['text']} -> {link['href']}\n"
-    
-    if interactive_elements['important_links']:
-        summary += "\n## Important Links by Section\n"
-        for section in interactive_elements['important_links']:
-            summary += f"\n### {section['section'].title()}\n"
-            for link in section['links']:
-                summary += f"- {link['text']} -> {link['href']}\n"
-    
-    # Ensure we don't exceed the maximum length
-    if len(summary) > max_length:
-        summary = summary[:max_length] + "\n\n[...content truncated due to length...]"
-    
+            if not add(f"links in <{section_tag}>", "\n".join(links)):
+                break
+
+    summary = "".join(parts).strip()
+    if not summary:
+        body = soup.find("body")
+        summary = (str(body) if body else soup.get_text("\n")).strip()
+        if len(summary) > max_length:
+            summary = summary[:max_length]
     return summary

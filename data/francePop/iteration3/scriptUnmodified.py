@@ -6,17 +6,18 @@ async def main():
         browser = await p.chromium.launch()
         page = await browser.new_page()
 
-        # Go directly to the France article on Wikipedia
-        await page.goto("https://en.wikipedia.org/wiki/France")
+        # Open the France article and wait for the content to load completely
+        await page.goto("https://en.wikipedia.org/wiki/France", wait_until="domcontentloaded")
 
-        # Locate the population row in the infobox and extract its value
+        # Increase timeout to give Wikipedia time to render the infobox
         population_selector = (
-            "table.infobox tr:has(td:has-text('Population')) td:nth-child(2)"
+            "//table[contains(@class,'infobox')]"
+            "//tr[th[contains(text(),'Population')]]/td[1]"
         )
-        element = await page.wait_for_selector(population_selector)
+        element = await page.wait_for_selector(population_selector, state="visible", timeout=60000)
         population_text = await element.inner_text()
 
-        # Clean up the extracted text (remove commas, footnotes, etc.)
+        # Keep only digits and commas, then remove commas
         cleaned_population = "".join(
             ch for ch in population_text if ch.isdigit() or ch == ","
         ).replace(",", "")

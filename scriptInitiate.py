@@ -15,7 +15,7 @@ def generate_initial_prompt(instruction, success_criteria):
         "1. Use asynchronous Playwright\n"
         "2. Do not use try/catch blocks\n"
         "3. The script should be self-contained with all necessary imports\n"
-        "4. The script should be executable directly and not wrapped in a function\n"
+        "4. The script should be executable directly (remember that 'async with' outside async function is not allowed)\n"
         "5. Do not include any if __name__ == \"__main__\": blocks\n\n"
         "Only return the proposed python script."
     )

@@ -1,0 +1,92 @@
+<!-- form -->
+<form action="/w/index.php" class="cdx-search-input cdx-search-input--has-end-button" id="searchform">
+<div class="cdx-search-input__input-wrapper" data-search-loc="header-moved" id="simpleSearch">
+<div class="cdx-text-input cdx-text-input--has-start-icon">
+<input accesskey="f" aria-label="Search Wikipedia" autocapitalize="sentences" autocomplete="off" class="cdx-text-input__input mw-searchInput" id="searchInput" name="search" placeholder="Search Wikipedia" spellcheck="false" title="Search Wikipedia [alt-f]" type="search"/>
+<span class="cdx-text-input__icon cdx-text-input__start-icon"></span>
+</div>
+<input name="title" type="hidden" value="Special:Search"/>
+</div>
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+</form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-0" id="skin-client-pref-vector-feature-custom-font-size-value-0" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="0"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-0"><span class="cdx-label__label__text">Small</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-1" id="skin-client-pref-vector-feature-custom-font-size-value-1" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="1"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-1"><span class="cdx-label__label__text">Standard</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-2" id="skin-client-pref-vector-feature-custom-font-size-value-2" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="2"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-2"><span class="cdx-label__label__text">Large</span></label></div></form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-limited-width-value-1" id="skin-client-pref-vector-feature-limited-width-value-1" name="skin-client-pref-vector-feature-limited-width-group" type="radio" value="1"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-limited-width-value-1"><span class="cdx-label__label__text">Standard</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-limited-width-value-0" id="skin-client-pref-vector-feature-limited-width-value-0" name="skin-client-pref-vector-feature-limited-width-group" type="radio" value="0"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-limited-width-value-0"><span class="cdx-label__label__text">Wide</span></label></div></form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-os" id="skin-client-pref-skin-theme-value-os" name="skin-client-pref-skin-theme-group" type="radio" value="os"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-os"><span class="cdx-label__label__text">Automatic</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-day" id="skin-client-pref-skin-theme-value-day" name="skin-client-pref-skin-theme-group" type="radio" value="day"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-day"><span class="cdx-label__label__text">Light</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-night" id="skin-client-pref-skin-theme-value-night" name="skin-client-pref-skin-theme-group" type="radio" value="night"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-night"><span class="cdx-label__label__text">Dark</span></label></div></form>
+
+<!-- form -->
+<form action="/w/index.php" class="cdx-search-input cdx-search-input--has-end-button" id="vector-sticky-search-form">
+<div class="cdx-search-input__input-wrapper" data-search-loc="header-moved">
+<div class="cdx-text-input cdx-text-input--has-start-icon">
+<input autocomplete="off" class="cdx-text-input__input mw-searchInput" name="search" placeholder="Search Wikipedia" type="search"/>
+<span class="cdx-text-input__icon cdx-text-input__start-icon"></span>
+</div>
+<input name="title" type="hidden" value="Special:Search"/>
+</div>
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+</form>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-main-menu.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-main-menu.unpin">hide</button>
+
+<!-- button -->
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-toc.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-toc.unpin">hide</button>
+
+<!-- button -->
+<button aria-controls="toc-History-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle History subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Geography-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Geography subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Politics-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Politics subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Economy-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Economy subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Demographics-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Demographics subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Culture-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Culture subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-External_links-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle External links subsection</span>
+</button>
+
+<!-- table (caption+thead) -->
+<table class="infobox ib-country vcard"></table>

@@ -1,11 +1,4 @@
-from __future__ import annotations
 
-import os
-import re
-from pathlib import Path
-
-def generate_prelude(timeout_seconds):
-    return f"""
 import sys, os, asyncio, contextlib, atexit, traceback
 from pathlib import Path
 from playwright.async_api import async_playwright, Page, Locator, ElementHandle, BrowserType, Browser, BrowserContext
@@ -38,7 +31,7 @@ async def _save_html(page: "Page"):
         html = await page.content()
         html_file.write_text(html, encoding="utf-8")
     except Exception as e:
-        print(f"[tracking] Failed to save HTML: {{e!r}}", file=sys.stderr)
+        print(f"[tracking] Failed to save HTML: {e!r}", file=sys.stderr)
 
 # ---- Tail-only traceback for errorMessage.txt (fixed to last 8 frames) ----
 _TB_TAIL = 8  # fixed tail length
@@ -64,7 +57,7 @@ def _excepthook(etype, value, tb):
                 asyncio.run(_save_html(lp))
     # concise header with full Playwright message (includes Call log), then tail frames only
     try:
-        print(f"Exception: {{etype.__name__}}: {{value}}", file=sys.stderr)
+        print(f"Exception: {etype.__name__}: {value}", file=sys.stderr)
         # print("Traceback (last 8 frame(s)):", file=sys.stderr)
         # print(_format_tail_tb(value, _TB_TAIL), file=sys.stderr)
         sys.stderr.flush()
@@ -78,7 +71,7 @@ def _wrap_page_method(name: str):
     async def wrapper(self: "Page", *args, **kwargs):
         globals()["_LAST_PAGE"] = self
         # enforce a max timeout in ms (cap), but keep it Playwright-native
-        cap_ms = {int(timeout_seconds * 1000)}  # your timeout_seconds * 1000
+        cap_ms = 10000  # your timeout_seconds * 1000
         user_ms = kwargs.get("timeout", None)
         if user_ms is None or user_ms > cap_ms:
             kwargs["timeout"] = cap_ms
@@ -86,7 +79,7 @@ def _wrap_page_method(name: str):
             return await orig(self, *args, **kwargs)   # <-- no asyncio.wait_for
         except Exception as e:
             await _save_html(self)
-            print(f"[tracking] Page.{{name}} failed: {{e}}", file=sys.stderr)
+            print(f"[tracking] Page.{name} failed: {e}", file=sys.stderr)
             raise
     return wrapper
 
@@ -102,7 +95,7 @@ def _wrap_locator_method(name: str):
         if page is None:
             page = globals().get("_LAST_PAGE")
 
-        cap_ms = {int(timeout_seconds * 1000)}  # your timeout_seconds * 1000
+        cap_ms = 10000  # your timeout_seconds * 1000
         user_ms = kwargs.get("timeout", None)
         if user_ms is None or user_ms > cap_ms:
             kwargs["timeout"] = cap_ms
@@ -111,7 +104,7 @@ def _wrap_locator_method(name: str):
         except Exception as e:
             if page is not None:
                 await _save_html(page)
-            print(f"[tracking] Locator.{{name}} failed: {{e}}", file=sys.stderr)
+            print(f"[tracking] Locator.{name} failed: {e}", file=sys.stderr)
             raise
     return wrapper
 
@@ -130,7 +123,7 @@ def _wrap_page_sync_method(name: str):
                 with contextlib.suppress(Exception):
                     asyncio.run(_save_html(self))     # last resort if no loop
             try:
-                print(f"Exception in Page.{{name}}: {{e}}", file=sys.stderr)
+                print(f"Exception in Page.{name}: {e}", file=sys.stderr)
                 sys.stderr.flush()
             except Exception:
                 pass
@@ -149,7 +142,7 @@ def _wrap_element_method(name: str):
         if page is None:
             page = globals().get("_LAST_PAGE")
 
-        cap_ms = {int(timeout_seconds * 1000)}  # your timeout_seconds * 1000
+        cap_ms = 10000  # your timeout_seconds * 1000
         user_ms = kwargs.get("timeout", None)
         if user_ms is None or user_ms > cap_ms:
             kwargs["timeout"] = cap_ms
@@ -158,7 +151,7 @@ def _wrap_element_method(name: str):
         except Exception as e:
             if page is not None:
                 await _save_html(page)
-            print(f"[tracking] ElementHandle.{{name}} failed: {{e}}", file=sys.stderr)
+            print(f"[tracking] ElementHandle.{name} failed: {e}", file=sys.stderr)
             raise
     return wrapper
 
@@ -209,16 +202,16 @@ async def _launch_headed(self, *args, **kwargs):
     _orig_new_context = browser.new_context
     async def _new_context(*aa, **kk):
         ctx: BrowserContext = await _orig_new_context(*aa, **kk)
-        ctx.set_default_timeout({int(timeout_seconds*1000)})
-        ctx.set_default_navigation_timeout({int(timeout_seconds*1000)})
+        ctx.set_default_timeout(10000)
+        ctx.set_default_navigation_timeout(10000)
         return ctx
     browser.new_context = _new_context
 
     _orig_new_page = browser.new_page
     async def _new_page(*aa, **kk):
         page = await _orig_new_page(*aa, **kk)
-        page.set_default_timeout({int(timeout_seconds*1000)})
-        page.set_default_navigation_timeout({int(timeout_seconds*1000)})
+        page.set_default_timeout(10000)
+        page.set_default_navigation_timeout(10000)
         globals()["_LAST_PAGE"] = page
         return page
     browser.new_page = _new_page
@@ -248,30 +241,33 @@ def _close_browser_if_any():
         asyncio.run(_do_close())
     except Exception:
         pass
-"""
 
-def strip_async_playwright_imports(content):
-    """
-    Remove lines like:
-      from playwright.async_api import async_playwright
-      from playwright.async_api import async_playwright as ap
-      from playwright.async_api import async_playwright, Page
-    (We remove the whole line if it imports async_playwright at all.)
-    """
-    pattern = r'^[ \t]*from[ \t]+playwright\.async_api[ \t]+import[ \t]+.*\basync_playwright\b.*$'
-    return re.sub(pattern, "", content, flags=re.MULTILINE)
+import asyncio
 
-def create_tracked_script(original_script_path, output_script_path, timeout_seconds=10):
-    with open(original_script_path, 'r', encoding='utf-8') as f:
-        original_content = f.read()
 
-    original_content = strip_async_playwright_imports(original_content)
-    
-    parts = []
-    parts.append(generate_prelude(timeout_seconds))
-    parts.append(original_content)
+async def main():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
 
-    final_script = "\n".join(parts)
+        # Navigate to the France Wikipedia article and wait for full load
+        await page.goto("https://en.wikipedia.org/wiki/France", wait_until="load")
 
-    with open(output_script_path, 'w', encoding='utf-8') as f:
-        f.write(final_script)
+        # Locate the population value in the infobox (first td of the Population row)
+        population_selector = (
+            "//table[contains(@class,'infobox')]"
+            "//tr[th[contains(text(),'Population')]]/td[1]"
+        )
+        element = await page.wait_for_selector(population_selector, state="visible")
+        population_text = await element.inner_text()
+
+        # Clean the extracted text: keep digits and commas, then remove commas
+        cleaned_population = "".join(
+            ch for ch in population_text if ch.isdigit() or ch == ","
+        ).replace(",", "")
+
+        print(f"The population of France is {cleaned_population}")
+
+        await browser.close()
+
+asyncio.run(main())

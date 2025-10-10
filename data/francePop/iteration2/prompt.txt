@@ -1,0 +1,107 @@
+You are a RPA assistant that generates a Python script based on a user's instruction for interactions with web applications using the Playwright package.
+The user's original instruction was: Starting at https://www.wikipedia.org/, find the population of France
+The user's success criteria was: Print a statement of the form: The population of France is x. x should be a reasonable number for France's population
+Here's the original script that had the error:
+```python
+import asyncio
+from playwright.async_api import async_playwright
+
+async def main():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
+
+        # Go directly to the France article on Wikipedia
+        await page.goto("https://en.wikipedia.org/wiki/France")
+
+        # Locate the population row in the infobox and extract its value
+        population_selector = (
+            "table.infobox tr:has(td:has-text('Population')) td:nth-child(2)"
+        )
+        element = await page.wait_for_selector(population_selector)
+        population_text = await element.inner_text()
+
+        # Clean up the extracted text (remove commas, footnotes, etc.)
+        cleaned_population = "".join(
+            ch for ch in population_text if ch.isdigit() or ch == ","
+        ).replace(",", "")
+
+        print(f"The population of France is {cleaned_population}")
+
+        await browser.close()
+
+asyncio.run(main())
+```
+
+The user is trying to fix an error in their script. Here's the error that occurred:
+ [tracking] Page.wait_for_selector failed: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("table.infobox tr:has(td:has-text('Population')) td:nth-child(2)") to be visible
+
+[tracking] Failed to save HTML: TargetClosedError('Page.content: Target page, context or browser has been closed')
+Exception: TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("table.infobox tr:has(td:has-text('Population')) td:nth-child(2)") to be visible
+
+
+The script does not currently output anything
+Prior to failing its execution, the page had the following summarised HTML content:
+<!-- form -->
+<form action="/w/index.php" class="cdx-search-input cdx-search-input--has-end-button" id="searchform">
+<div class="cdx-search-input__input-wrapper" data-search-loc="header-moved" id="simpleSearch">
+<div class="cdx-text-input cdx-text-input--has-start-icon">
+<input accesskey="f" aria-label="Search Wikipedia" autocapitalize="sentences" autocomplete="off" class="cdx-text-input__input mw-searchInput" id="searchInput" name="search" placeholder="Search Wikipedia" spellcheck="false" title="Search Wikipedia [alt-f]" type="search"/>
+<span class="cdx-text-input__icon cdx-text-input__start-icon"></span>
+</div>
+<input name="title" type="hidden" value="Special:Search"/>
+</div>
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+</form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-0" id="skin-client-pref-vector-feature-custom-font-size-value-0" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="0"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-0"><span class="cdx-label__label__text">Small</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-1" id="skin-client-pref-vector-feature-custom-font-size-value-1" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="1"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-1"><span class="cdx-label__label__text">Standard</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-2" id="skin-client-pref-vector-feature-custom-font-size-value-2" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="2"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-2"><span class="cdx-label__label__text">Large</span></label></div></form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-limited-width-value-1" id="skin-client-pref-vector-feature-limited-width-value-1" name="skin-client-pref-vector-feature-limited-width-group" type="radio" value="1"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-limited-width-value-1"><span class="cdx-label__label__text">Standard</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-limited-width-value-0" id="skin-client-pref-vector-feature-limited-width-value-0" name="skin-client-pref-vector-feature-limited-width-group" type="radio" value="0"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-limited-width-value-0"><span class="cdx-label__label__text">Wide</span></label></div></form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-os" id="skin-client-pref-skin-theme-value-os" name="skin-client-pref-skin-theme-group" type="radio" value="os"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-os"><span class="cdx-label__label__text">Automatic</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-day" id="skin-client-pref-skin-theme-value-day" name="skin-client-pref-skin-theme-group" type="radio" value="day"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-day"><span class="cdx-label__label__text">Light</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-night" id="skin-client-pref-skin-theme-value-night" name="skin-client-pref-skin-theme-group" type="radio" value="night"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-night"><span class="cdx-label__label__text">Dark</span></label></div></form>
+
+<!-- form -->
+<form action="/w/index.php" class="cdx-search-input cdx-search-input--has-end-button" id="vector-sticky-search-form">
+<div class="cdx-search-input__input-wrapper" data-search-loc="header-moved">
+<div class="cdx-text-input cdx-text-input--has-start-icon">
+<input autocomplete="off" class="cdx-text-input__input mw-searchInput" name="search" placeholder="Search Wikipedia" type="search"/>
+<span class="cdx-text-input__icon cdx-text-input__start-icon"></span>
+</div>
+<input name="title" type="hidden" value="Special:Search"/>
+</div>
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+</form>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-main-menu.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-main-menu.unpin">hide</button>
+
+<!-- button -->
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-toc.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-toc.unpin">hide</button>
+
+<!-- table (caption+thead) -->
+<table class="infobox ib-country vcard"></table>
+IMPORTANT: The script should follow these rules:
+1. Use asynchronous Playwright
+2. Do not use try/catch blocks
+3. The script should be self-contained with all necessary imports
+4. The script should be executable directly (remember that 'async with' outside async function is not allowed)
+5. Do not include any if __name__ == "__main__": blocks
+
+Please generate a corrected version of the script that fixes the error while maintaining the original functionality.
+Only return the proposed python script.

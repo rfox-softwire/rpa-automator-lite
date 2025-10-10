@@ -50,14 +50,14 @@ def generate_repair_prompt(files_content):
     ]
     
     if files_content['error']:
-        prompt.append(f"The user is trying to fix an error in their script. Here's the error that occurred {files_content['error']}\n")
+        prompt.append(f"The user is trying to fix an error in their script. Here's the error that occurred:\n {files_content['error']}\n")
     else:
         prompt.append("The user is trying to fix an error in their script. The current script does not provide an error message\n")
     
     if files_content['output']:
-        prompt.append(f"The script currently outputs: {files_content['output']}\n")
+        prompt.append(f"The script currently outputs:\n {files_content['output']}\n")
     else:
-        prompt.append("The script does not currently output anything")
+        prompt.append("The script does not currently output anything\n")
 
     if files_content['html']:
         prompt.append(f"Prior to failing its execution, the page had the following summarised HTML content:\n{files_content['html']}\n")
@@ -67,7 +67,7 @@ def generate_repair_prompt(files_content):
         "1. Use asynchronous Playwright\n"
         "2. Do not use try/catch blocks\n"
         "3. The script should be self-contained with all necessary imports\n"
-        "4. The script should be executable directly and not wrapped in a function\n"
+        "4. The script should be executable directly (remember that 'async with' outside async function is not allowed)\n"
         "5. Do not include any if __name__ == \"__main__\": blocks\n\n"
         "Please generate a corrected version of the script that fixes the error while maintaining the original functionality.\n",
         "Only return the proposed python script."
