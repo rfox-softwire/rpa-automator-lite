@@ -2,6 +2,7 @@ from LLMClient import LLMClient
 import logging
 from pathlib import Path
 from scriptGeneration import generateScript
+from htmlSummary import summarise_html
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,7 +30,13 @@ def read_iteration_files(iteration_dir):
     files_content['script'] = read_if_exists(iteration_dir / 'scriptUnmodified.py')
     files_content['error'] = read_if_exists(iteration_dir / 'errorMessage.txt')
     files_content['success_criteria'] = read_if_exists(iteration_dir / 'successCriteria.txt')
-    files_content['html'] = read_if_exists(iteration_dir / 'HTML.txt')
+    
+    entire_html = read_if_exists(iteration_dir / 'HTML.txt')
+    if entire_html:
+        html_summary = summarise_html(entire_html)
+        with open(iteration_dir / "htmlSummary.txt", "w", encoding="utf-8") as f:
+            f.write(html_summary)
+        files_content['html'] = summarise_html(entire_html)
     
     return files_content
 
@@ -53,7 +60,7 @@ def generate_repair_prompt(files_content):
         prompt.append("The script does not currently output anything")
 
     if files_content['html']:
-        prompt.append(f"Prior to failing its exectution, the page had the following HTML content:\n{files_content['html']}\n")
+        prompt.append(f"Prior to failing its execution, the page had the following summarised HTML content:\n{files_content['html']}\n")
 
     prompt.extend([
         "IMPORTANT: The script should follow these rules:\n"
