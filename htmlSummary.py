@@ -2,12 +2,7 @@ from bs4 import BeautifulSoup, NavigableString, Tag, Comment
 import re
 from copy import deepcopy
 
-# -----------------------------
-# Helpers for HTML minimisation
-# -----------------------------
-
-# Attribute whitelist by tag (keep semantics; drop styling/noise). 'class' is always preserved; 'style' is always removed.
-_ATTRS = {
+retained_attributes = {
     "table": {"role", "aria-label", "summary"},
     "caption": set(),
     "thead": set(),
@@ -19,245 +14,150 @@ _ATTRS = {
     "a": {"href", "title"},
 }
 
-def _strip_attrs(tag):
-    # Always drop inline styles
-    if "style" in tag.attrs:
-        del tag.attrs["style"]
-    keep = _ATTRS.get(tag.name, set())
-    # Always preserve 'class' (semantic grouping), plus any whitelisted attrs
-    for attr in list(tag.attrs):
-        if attr == "class":
+removed_elements = ["script", "style", "noscript", "svg", "img"]
+
+def keep_retained_attributes(tag):
+    if "style" in tag.attributes:
+        del tag.attributes["style"]
+    keep = retained_attributes.get(tag.name, set())
+    for attribute in list(tag.attributes):
+        if attribute == "class":
             continue
-        if attr not in keep:
-            del tag.attrs[attr]
+        if attribute not in keep:
+            del tag.attributes[attribute]
 
 
-def _collapse_whitespace(node: Tag):
+def remove_leading_whitespace(node):
     for text in node.find_all(string=True):
         if isinstance(text, NavigableString):
             if text.parent and text.parent.name == "pre":
                 continue
             text.replace_with(" ".join(str(text).split()))
 
-def _minify_within_cell(node):
-    """
-    Keep links (a[href]) and basic inline semantics (b/strong/em/code).
-    Drop spans/divs/styles/scripts. Replace nested blocks with their text.
-    """
-    for el in list(node.descendants):
-        if not isinstance(el, Tag) or not el.name:
+def minify_text_within_table_cell(node):
+    for html_element in list(node.descendants):
+        if not isinstance(html_element, Tag) or not html_element.name:
             continue
-        name = el.name.lower()
-        if name in {"script", "style", "svg"}:
-            el.decompose()
+        name = html_element.name.lower()
+        if name in removed_elements:
+            html_element.decompose()
             continue
         if name in {"span", "div"}:
-            el.unwrap()  # keep text but drop tag
+            html_element.unwrap()
             continue
         if name == "a":
-            # Keep only href + text
-            _strip_attrs(el)
+            keep_retained_attributes(html_element)
             continue
         if name in {"strong", "b", "em", "i", "code"}:
-            # keep tag but drop attributes
-            el.attrs = {}
+            html_element.attributes = {}
             continue
-        if name == "img":
-            # Keep only small/meaningful alt; replace big images with alt text
-            alt = el.get("alt", "")
-            if len(alt) <= 120:
-                _strip_attrs(el)
-            else:
-                el.replace_with(alt)
 
-def _table_visible_text(table):
-    """Return TSV-like visible text for a table."""
-    rows = []
-    for tr in table.find_all("tr"):
-        cells = tr.find_all(["th", "td"])
-        if not cells:
+def summarise_text_from_table(table):
+    table_rows_list = []
+    for table_row in table.find_all("tr"):
+        table_cells = table_row.find_all(["th", "td"])
+        if not table_cells:
             continue
-        vals = []
-        for c in cells:
-            t = " ".join(c.get_text(" ", strip=True).split())
-            vals.append(t)
-        rows.append("\t".join(vals))
-    return "\n".join(rows)
+        table_row_value_list = []
+        for table_cell in table_cells:
+            table_cell_text = " ".join(table_cell.get_text(" ", strip=True).split())
+            table_row_value_list.append(table_cell_text)
+        table_rows.append("\t".join(table_row_value_list))
+    return "\n".join(table_rows)
 
-def _minify_table_html(inTable):
-    """
-    Produce a compact, semantic-preserving HTML for a table:
-      - keep caption/thead structure
-      - strip non-semantic attributes
-      - simplify cell contents (unwrap spans/divs, keep links and basic inline tags)
-    """
-    table = deepcopy(inTable)  # operate on a clone
-    for el in table.find_all(["script", "style", "noscript", "svg"]):
-        el.decompose()
+def summarise_table(inTable):
+    table = deepcopy(inTable)
+    for element in table.find_all(removed_elements):
+        element.decompose()
 
-    # Walk and strip attributes
     for tag in table.find_all(True):
-        _strip_attrs(tag)
+        keep_retained_attributes(tag)
         if tag.name in {"th", "td"}:
-            _minify_within_cell(tag)
+            minify_text_within_table_cell(tag)
 
-    # Collapse whitespace in text nodes
-    for text in table.find_all(string=True):
-        if isinstance(text, NavigableString):
-            # Keep whitespace in <pre> as-is
-            if text.parent and text.parent.name == "pre":
-                continue
-            text.replace_with(" ".join(str(text).split()))
-
+    remove_leading_whitespace(table)
     return str(table)
 
-def _clean_global_html(soup: BeautifulSoup) -> BeautifulSoup:
-    """Return a deep-copied soup with superfluous content stripped but IDs/classes kept."""
-    s2 = deepcopy(soup)
+def strip_full_html(inSoup):
+    soup = deepcopy(inSoup)
 
-    # 1) drop noisy nodes globally
-    for el in s2(["script", "style", "noscript", "svg"]):
-        el.decompose()
-    # remove HTML comments
-    for c in s2.find_all(string=lambda t: isinstance(t, Comment)):
-        c.extract()
+    for html_element in soup(removed_elements):
+        html_element.decompose()
+    
+    for tag in soup.find_all(True):
+        if isinstance(tag, Comment):
+            tag.extract()
+        else:
+            keep_retained_attributes(tag)
 
-    # 2) strip attributes according to policy
-    for tag in s2.find_all(True):
-        _strip_attrs(tag)
+    remove_leading_whitespace(soup)
+    return soup
 
-    # 3) shrink huge images: drop src (keep alt) to avoid data URLs
-    for img in s2.find_all("img"):
-        if "src" in img.attrs:
-            del img.attrs["src"]
-
-    # 4) collapse whitespace
-    _collapse_whitespace(s2)
-
-    return s2
-
-# -----------------------------
-# Main summariser
-# -----------------------------
-
-def summarise_html(html_content: str, max_length: int = 8000) -> str:
-    """
-    Summarise key interactive parts of an HTML page, preferring original HTML.
-    Order: forms, buttons, tables, nav menus, links.
-
-    Tables strategy to respect tight budgets while retaining HTML:
-      1) Try MINIFIED HTML for the first table (not raw outerHTML).
-      2) If still over budget, degrade to CAPTION+THEAD only (minified).
-      3) If still over, degrade to TSV text (inside <pre>).
-      4) For subsequent tables, include only TSV text (<pre>) to save space.
-
-    Other sections keep original outerHTML (with budget checks).
-    """
+def summarise_html(html_content, max_length = 8000):
     soup = BeautifulSoup(html_content, "html.parser")
 
-    # Remove global noise
-    for el in soup(["script", "style", "noscript", "svg"]):
-        el.decompose()
+    for html_element in soup(removed_elements):
+        html_element.decompose()
 
-    parts: list[str] = []
+    html_summary_array = []
     budget = max_length
 
-    def add(label: str, content: str, force: bool = False) -> bool:
-        nonlocal budget
-        if not content:
-            return True
+    def add_to_summary(label, content, force = False):
         block = f"\n<!-- {label} -->\n{content}\n"
         if force or len(block) <= budget:
-            parts.append(block)
-            budget -= len(block)
-            return True
-        return False
+            html_summary_array.append(block)
+            return len(block)
+        return 0
 
-    # -------- FORMS --------
     for form in soup.find_all("form"):
-        if not add("form", str(form)):
-            break
+        budget -= add_to_summary("form", str(form))
+    
+    seen_buttons = set()
+    for button in soup.find_all("button"):
+        button_text = str(button).strip()
+        if button_text and button_text not in seen_buttons:
+            budget -= add_to_summary("button", button_text)
+            seen_buttons.add_to_summary(button_text)
 
-    # -------- BUTTONS (unique) --------
-    seen_btn = set()
-    for btn in soup.find_all("button"):
-        h = str(btn).strip()
-        if h and h not in seen_btn:
-            if not add("button", h):
-                break
-            seen_btn.add(h)
-
-    # -------- TABLES --------
     tables = soup.find_all("table")
     if tables:
-        # First table: try a minified HTML version first
-        t0 = deepcopy(tables[0])
-        min_html = _minify_table_html(t0)
-        if len(min_html) <= budget or budget == max_length:  # allow first block to lead
-            if not add("table (minified HTML)", min_html, force=len(min_html) > budget):
-                # shouldn't happen because of force, but keep safe
-                pass
+        first_table = deepcopy(tables[0])
+        summarised_table_html = summarise_table(first_table)
+        if len(summarised_table_html) <= budget or budget == max_length:
+            budget -= add_to_summary("table (minified HTML)", summarised_table_html, force=True)
         else:
-            # If even minified is too big, try caption+thead only
-            t_head_only = deepcopy(t0)
-            for node in t_head_only.find_all(True):
-                if node.name not in {"table", "caption", "thead", "tr", "th"}:
-                    node.decompose()
-            head_min = _minify_table_html(t_head_only)
-            if not add("table (caption+thead)", head_min):
-                # Last resort: TSV
-                tsv = _table_visible_text(t0)
-                add("table (text only)", f"<pre>{tsv}</pre>", force=True)
+            tsv = summarise_text_from_table(first_table)
+            budget -= add_to_summary("table (text only)", f"<pre>{tsv}</pre>", force=True)
 
-        # Subsequent tables → TSV only
-        for t in tables[1:]:
-            tsv = _table_visible_text(t)
-            if not add("table (text only)", f"<pre>{tsv}</pre>"):
-                break
+        for table in tables[1:]:
+            tsv = summarise_text_from_table(table)
+            budget -= add_to_summary("table (text only)", f"<pre>{tsv}</pre>")
 
-    # -------- NAV MENUS --------
-    nav_candidates = soup.find_all(["nav"])
-    nav_candidates += soup.find_all(["ul", "div"], class_=re.compile(r"(nav|menu)", re.I))
-    seen_nav = set()
-    for nav in nav_candidates:
-        h = str(nav).strip()
-        if h and h not in seen_nav:
-            if not add("nav", h):
-                break
-            seen_nav.add(h)
+    nav_elements = soup.find_all(["nav"])
+    nav_elements += soup.find_all(["ul", "div"], class_=re.compile(r"(nav|menu)", re.I))
+    seen_nav_elements = set()
+    for nav_element in nav_elements:
+        nav_element_text = str(nav_element).strip()
+        if nav_element_text and nav_element_text not in seen_nav_elements:
+            budget -= add_to_summary("nav", nav_element_text)
+            seen_nav_elements.add_to_summary(nav_element_text)
 
-    # -------- LINKS --------
     for section_tag in ["header", "footer", "main", "article", "section", "aside"]:
         section = soup.find(section_tag)
-        if not section:
-            continue
         links = []
         for a in section.find_all("a", href=True):
             if a.get_text(strip=True):
                 links.append(str(a))
         if links:
-            if not add(f"links in <{section_tag}>", "\n".join(links)):
-                break
+            budget -= add_to_summary(f"links in <{section_tag}>", "\n".join(links))
 
     if budget > 0:
-        remainder = _clean_global_html(soup)
-
-        # Avoid duplicating already-extracted blocks: remove forms/buttons/tables/nav from remainder
-        for node in remainder.find_all(["form", "button", "table", "nav"]):
-            node.decompose()
-        # Optionally keep anchor tags but you've already added key links; so keep them in remainder
-        # but they are now cleaned (attrs stripped per policy).
-
-        remainder_html = str(remainder).lstrip()
-        # Cap to the remaining budget exactly
-        if len(remainder_html) > budget:
-            remainder_html = remainder_html[:budget]
-        add("remainder (cleaned HTML)", remainder_html, force=True)
+        full_html_stripped = strip_full_html(soup)
+        full_html_stripped_text = str(full_html_stripped).lstrip()
+        if len(full_html_stripped_text) > budget:
+            full_html_stripped_text = full_html_stripped_text[:budget]
+        add_to_summary("remainder (cleaned HTML)", full_html_stripped_text, force=True)
     
-    summary = "".join(parts).strip()
-    if not summary:
-        body = soup.find("body")
-        summary = (str(body) if body else soup.get_text("\n")).strip()
-        if len(summary) > max_length:
-            summary = summary[:max_length]
-    return summary
+    html_summary = "".join(html_summary_array).strip()
+
+    return html_summary
