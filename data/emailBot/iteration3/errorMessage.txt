@@ -1,0 +1,18 @@
+[tracking] Page.wait_for_selector failed: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("text=Policy Number:") to be visible
+    24 × locator resolved to 11 elements. Proceeding with the first one: <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following…</p>
+
+Exception: TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("text=Policy Number:") to be visible
+    24 × locator resolved to 11 elements. Proceeding with the first one: <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following…</p>
+
+Traceback (last 3 frame(s)):
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_frame.py", line 369, in wait_for_selector
+    await self._channel.send(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+

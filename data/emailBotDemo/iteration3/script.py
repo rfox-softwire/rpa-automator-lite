@@ -1,11 +1,4 @@
-from __future__ import annotations
 
-import os
-import re
-from pathlib import Path
-
-def generate_prelude(timeout_seconds):
-    return f"""
 import sys, os, asyncio, contextlib, atexit, traceback
 from pathlib import Path
 import inspect
@@ -27,7 +20,7 @@ sys.stderr = open(error_file, "w", encoding="utf-8")
 _LAST_PAGE = None        # type: Page | None
 _LAST_BROWSER = None     # type: Browser | None
 _SNAPSHOT_DONE = False
-CAP_MS = {int(timeout_seconds * 1000)} 
+CAP_MS = 10000 
 
 @atexit.register
 def _flush_streams():
@@ -52,8 +45,8 @@ async def _save_one_page(page: "Page", idx: int | None = None):
     except Exception:
         current_url = ""
 
-    html_path = base_dir / f"HTML-{{idx}}.txt"
-    url_path  = base_dir / f"url-{{idx}}.txt"
+    html_path = base_dir / f"HTML-{idx}.txt"
+    url_path  = base_dir / f"url-{idx}.txt"
 
     html_path.write_text(html, encoding="utf-8")
     url_path.write_text(current_url, encoding="utf-8")
@@ -168,18 +161,18 @@ def _make_async_wrapper(name, origin_cls):
                 if pg is not None:
                     await _save_all_pages(pg)
             finally:
-                print(f"[tracking] {{origin_cls.__name__}}.{{name}} failed: {{e}}", file=sys.stderr)
+                print(f"[tracking] {origin_cls.__name__}.{name} failed: {e}", file=sys.stderr)
             raise
     return _wrapped
 
 # --- auto-wrap all coroutine methods on target classes (skip dangerous ones) ---
-_BLACKLIST = {{
+_BLACKLIST = {
     # dunders / core internals
     "__class__", "__dict__", "__getattribute__", "__init__", "__repr__", "__str__",
     "__aenter__", "__aexit__",
     # event/routing setup where side-effects/timeouts can break semantics
     "expect_event", "wait_for_event", "on", "off", "route", "unroute",
-}}
+}
 
 def _auto_wrap_async_methods(origin_cls):
     for name in dir(origin_cls):
@@ -191,7 +184,7 @@ def _auto_wrap_async_methods(origin_cls):
             continue
         # wrap only coroutine functions (async defs). Skip properties/descriptors.
         if inspect.iscoroutinefunction(attr):
-            sentinel = f"__tracked_wrapped_{{name}}__"
+            sentinel = f"__tracked_wrapped_{name}__"
             if getattr(origin_cls, sentinel, False):
                 continue
             try:
@@ -221,7 +214,7 @@ def _wrap_sync_selector_factory(name: str):
             except RuntimeError:
                 with contextlib.suppress(Exception):
                     asyncio.run(_save_all_pages(self))
-            print(f"[tracking] Page.{{name}} failed (sync): {{e}}", file=sys.stderr)
+            print(f"[tracking] Page.{name} failed (sync): {e}", file=sys.stderr)
             raise
     return _wrapped
 
@@ -260,7 +253,7 @@ def _excepthook(etype, value, tb):
 
     # ... keep your concise header + tail-frames printing below ...
     try:
-        print(f"Exception: {{etype.__name__}}: {{value}}", file=sys.stderr)
+        print(f"Exception: {etype.__name__}: {value}", file=sys.stderr)
         print("Traceback (last 3 frame(s)):", file=sys.stderr)
         print(_format_tail_tb(value, _TB_TAIL), file=sys.stderr)
         sys.stderr.flush()
@@ -377,30 +370,85 @@ def _snapshot_then_close():
             asyncio.run(_do_close())
         except Exception:
             pass
-"""
 
-def strip_async_playwright_imports(content):
-    """
-    Remove lines like:
-      from playwright.async_api import async_playwright
-      from playwright.async_api import async_playwright as ap
-      from playwright.async_api import async_playwright, Page
-    (We remove the whole line if it imports async_playwright at all.)
-    """
-    pattern = r'^[ \t]*from[ \t]+playwright\.async_api[ \t]+import[ \t]+.*\basync_playwright\b.*$'
-    return re.sub(pattern, "", content, flags=re.MULTILINE)
+import asyncio
 
-def create_tracked_script(original_script_path, output_script_path, timeout_seconds=10):
-    with open(original_script_path, 'r', encoding='utf-8') as f:
-        original_content = f.read()
 
-    original_content = strip_async_playwright_imports(original_content)
-    
-    parts = []
-    parts.append(generate_prelude(timeout_seconds))
-    parts.append(original_content)
+async def main():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context()
 
-    final_script = "\n".join(parts)
+        # Two pages: inbox (3001) and claim‑management (3003)
+        page_3001 = await context.new_page()
+        page_3003 = await context.new_page()
 
-    with open(output_script_path, 'w', encoding='utf-8') as f:
-        f.write(final_script)
+        # 1️⃣ Open the claims inbox
+        await page_3001.goto("http://localhost:3001/")
+
+        # Ensure the Inbox view is visible
+        await page_3001.wait_for_selector('a[href="#"]')
+        await page_3001.click('a[href="#"]')
+
+        # Wait for the list of message items to appear
+        message_selector = ".message-item"
+        await page_3001.wait_for_selector(message_selector)
+        count = await page_3001.locator(message_selector).count()
+
+        for idx in range(count):
+            # 2️⃣ Open the email detail view
+            await page_3001.click(f"{message_selector}:nth-child({idx + 1})")
+
+            # Wait until the detail modal is visible
+            await page_3001.wait_for_selector("div.prose", state="visible")
+
+            # 3️⃣ Extract claim details from the opened detail view
+            prose_text = await page_3001.locator("div.prose").inner_text()
+            lines = [line.strip() for line in prose_text.splitlines() if line.strip()]
+            data = {}
+            for line in lines:
+                if ":" in line:
+                    key, value = line.split(":", 1)
+                    data[key.strip().lower()] = value.strip()
+
+            policy_number = data.get("policy number", "")
+            description   = data.get("description", "")
+            amount_str    = data.get("claim amount", "").replace("£", "").replace(",", "")
+            claim_amount  = float(amount_str) if amount_str else 0.0
+            date_str      = data.get("claim date", "")          # e.g., "31/01/2025"
+
+            # Convert date to ISO format required by <input type="date">
+            day, month, year = date_str.split("/")
+            iso_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"  # "2025-01-31"
+
+            # 4️⃣ Navigate to the new‑claim form page
+            await page_3003.goto("http://localhost:3003/")
+
+            # 5️⃣ Open the New Claim modal
+            await page_3003.wait_for_selector("#newClaimBtn")
+            await page_3003.click("#newClaimBtn")
+
+            # Wait for the modal to become visible
+            await page_3003.wait_for_selector("form#newClaimForm", state="visible")
+
+            # 6️⃣ Fill in the form fields (use correct IDs)
+            await page_3003.fill("#policyNumber", policy_number)
+            await page_3003.fill("#description", description)
+            await page_3003.fill("#claimAmount", str(claim_amount))
+            await page_3003.fill("#claimDate", iso_date)
+
+            # 7️⃣ Submit the form
+            await page_3003.click("button[type='submit']")
+
+            # 8️⃣ Verify that the claim appears in the list on 3003
+            await page_3003.wait_for_selector(f"text={policy_number}")
+
+            print(f"✅ Claim {idx + 1} ({policy_number}) submitted successfully.")
+
+            # 9️⃣ Return to the inbox for the next email
+            await page_3001.goto("http://localhost:3001/")
+            await page_3001.click('a[href="#"]')
+
+        await browser.close()
+
+asyncio.run(main())

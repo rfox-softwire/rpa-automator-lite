@@ -1,0 +1,54 @@
+import asyncio
+from playwright.async_api import async_playwright
+
+async def main():
+    # Launch browser
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context()
+        page_3001 = await context.new_page()
+        page_3003 = await context.new_page()
+
+        # 1️⃣ Visit the claims inbox (localhost:3001)
+        await page_3001.goto("http://localhost:3001/")
+
+        # Assume each claim email is represented by an element with class "claim-email"
+        claim_emails = await page_3001.query_selector_all(".claim-email")
+        for idx, email in enumerate(claim_emails):
+            # Open the claim details (click)
+            await email.click()
+
+            # Wait until the claim detail view loads
+            await page_3001.wait_for_selector("#policy-number")
+
+            # Extract required fields from the claim email
+            policy_number = await page_3001.input_value("#policy-number")
+            description   = await page_3001.input_value("#description")
+            amount_str    = await page_3001.input_value("#claim-amount")
+            date_str      = await page_3001.input_value("#claim-date")
+
+            # Convert amount to float if needed
+            claim_amount = float(amount_str.replace(",", "").replace("$", ""))
+
+            # 2️⃣ Navigate to the new‑claim form (localhost:3003)
+            await page_3003.goto("http://localhost:3003/")
+
+            # Fill in the form fields
+            await page_3003.fill("#policy-number-input", policy_number)
+            await page_3003.fill("#description-input", description)
+            await page_3003.fill("#claim-amount-input", str(claim_amount))
+            await page_3003.fill("#claim-date-input", date_str)
+
+            # Submit the form
+            await page_3003.click("button[type='submit']")
+
+            # Verify that the claim appears in the list on 3003
+            await page_3003.wait_for_selector(f"text={policy_number}")
+            assert await page_3003.inner_text(f"tr:has-text('{policy_number}')") is not None
+
+            # Return to the inbox for the next email
+            await page_3001.goto("http://localhost:3001/")
+
+        await browser.close()
+
+asyncio.run(main())

@@ -1,0 +1,24 @@
+[tracking] Page.fill failed: Page.fill: Error: Malformed value
+Call log:
+  - waiting for locator("#claimDate")
+    - locator resolved to <input type="date" required="" id="claimDate" name="claimDate" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"/>
+    - fill("25/05/2024")
+  - attempting fill action
+    - waiting for element to be visible, enabled and editable
+
+Exception: Error: Page.fill: Error: Malformed value
+Call log:
+  - waiting for locator("#claimDate")
+    - locator resolved to <input type="date" required="" id="claimDate" name="claimDate" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"/>
+    - fill("25/05/2024")
+  - attempting fill action
+    - waiting for element to be visible, enabled and editable
+
+Traceback (last 3 frame(s)):
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_frame.py", line 602, in _fill
+    await self._channel.send("fill", self._timeout, locals_to_params(locals()))
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+

@@ -1,0 +1,14 @@
+You are a RPA assistant that generates a Python script based on a user's instruction for interactions with web applications using the Playwright package.
+
+The user's instructions are: Click through each claim email at http://localhost:3001/ and enter the details (policy number, description, claim amount and claim date)  as a new claim at http://localhost:3003
+
+The resulting script should: Every claim should be visible with the correct details in http://localhost:3003/
+
+IMPORTANT: The script should follow these rules:
+1. Use asynchronous Playwright
+2. Do not use try/catch blocks
+3. The script should be self-contained with all necessary imports
+4. The script should be executable directly (remember that 'async with' outside async function is not allowed)
+5. Do not include any if __name__ == "__main__": blocks
+
+Only return the proposed python script.

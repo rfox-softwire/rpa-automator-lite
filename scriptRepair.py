@@ -14,7 +14,8 @@ def read_iteration_files(iteration_dir):
         'script': None,
         'error': None,
         'success_criteria': None,
-        'html': None
+        'html': [],
+        'url': []
     }
     
     def read_if_exists(file_path):
@@ -31,12 +32,16 @@ def read_iteration_files(iteration_dir):
     files_content['error'] = read_if_exists(iteration_dir / 'errorMessage.txt')
     files_content['success_criteria'] = read_if_exists(iteration_dir / 'successCriteria.txt')
     
-    entire_html = read_if_exists(iteration_dir / 'HTML.txt')
-    if entire_html:
+    page_count = 1
+    entire_html = read_if_exists(iteration_dir / f'HTML-{page_count}.txt')
+    while entire_html:
         html_summary = summarise_html(entire_html)
-        with open(iteration_dir / "htmlSummary.txt", "w", encoding="utf-8") as f:
+        with open(iteration_dir / f"htmlSummary-{page_count}.txt", "w", encoding="utf-8") as f:
             f.write(html_summary)
-        files_content['html'] = summarise_html(entire_html)
+        files_content['html'].append(html_summary)
+        files_content['url'].append(read_if_exists(iteration_dir / f'url-{page_count}.txt'))
+        page_count += 1
+        entire_html = read_if_exists(iteration_dir / f'HTML-{page_count}.txt')
     
     return files_content
 
@@ -59,8 +64,8 @@ def generate_repair_prompt(files_content):
     else:
         prompt.append("The script does not currently output anything\n")
 
-    if files_content['html']:
-        prompt.append(f"Prior to failing its execution, the page had the following summarised HTML content:\n{files_content['html']}\n")
+    for index, htmlSummary in enumerate(files_content['html']):
+        prompt.append(f"Prior to failing its execution, {files_content['url'][index]} had the following summarised HTML content:\n{htmlSummary}\n")
 
     prompt.extend([
         "IMPORTANT: The script should follow these rules:\n"

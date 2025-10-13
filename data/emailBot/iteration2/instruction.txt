@@ -1,0 +1,1 @@
+Click through each claim email at http://localhost:3001/ and enter the details (policy number, description, claim amount and claim date)  as a new claim at http://localhost:3003

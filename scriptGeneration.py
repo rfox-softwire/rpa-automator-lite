@@ -19,6 +19,12 @@ def generateScript(iteration_filepath, user_instruction, success_criteria, promp
     llm_response = llmClient.send_prompt(prompt, temperature = 0.4)
     llm_response_content = llm_response["choices"][0]["message"]["content"]
 
+    with open(iteration_filepath / "fullResponse.txt", "w", encoding="utf-8") as f:
+        f.write(str(llm_response))
+    
+    with open(iteration_filepath / "responseContent.txt", "w", encoding="utf-8") as f:
+        f.write(str(llm_response_content))
+
     logger.info(f"Generated content length: {len(llm_response_content)} characters")
     logger.info(f"Generated content preview: {llm_response_content[:200]}...")
 

@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup, NavigableString, Tag
+from bs4 import BeautifulSoup, NavigableString, Tag, Comment
 import re
 from copy import deepcopy
 
@@ -30,6 +30,14 @@ def _strip_attrs(tag):
             continue
         if attr not in keep:
             del tag.attrs[attr]
+
+
+def _collapse_whitespace(node: Tag):
+    for text in node.find_all(string=True):
+        if isinstance(text, NavigableString):
+            if text.parent and text.parent.name == "pre":
+                continue
+            text.replace_with(" ".join(str(text).split()))
 
 def _minify_within_cell(node):
     """
@@ -102,6 +110,31 @@ def _minify_table_html(inTable):
             text.replace_with(" ".join(str(text).split()))
 
     return str(table)
+
+def _clean_global_html(soup: BeautifulSoup) -> BeautifulSoup:
+    """Return a deep-copied soup with superfluous content stripped but IDs/classes kept."""
+    s2 = deepcopy(soup)
+
+    # 1) drop noisy nodes globally
+    for el in s2(["script", "style", "noscript", "svg"]):
+        el.decompose()
+    # remove HTML comments
+    for c in s2.find_all(string=lambda t: isinstance(t, Comment)):
+        c.extract()
+
+    # 2) strip attributes according to policy
+    for tag in s2.find_all(True):
+        _strip_attrs(tag)
+
+    # 3) shrink huge images: drop src (keep alt) to avoid data URLs
+    for img in s2.find_all("img"):
+        if "src" in img.attrs:
+            del img.attrs["src"]
+
+    # 4) collapse whitespace
+    _collapse_whitespace(s2)
+
+    return s2
 
 # -----------------------------
 # Main summariser
@@ -206,6 +239,21 @@ def summarise_html(html_content: str, max_length: int = 8000) -> str:
             if not add(f"links in <{section_tag}>", "\n".join(links)):
                 break
 
+    if budget > 0:
+        remainder = _clean_global_html(soup)
+
+        # Avoid duplicating already-extracted blocks: remove forms/buttons/tables/nav from remainder
+        for node in remainder.find_all(["form", "button", "table", "nav"]):
+            node.decompose()
+        # Optionally keep anchor tags but you've already added key links; so keep them in remainder
+        # but they are now cleaned (attrs stripped per policy).
+
+        remainder_html = str(remainder).lstrip()
+        # Cap to the remaining budget exactly
+        if len(remainder_html) > budget:
+            remainder_html = remainder_html[:budget]
+        add("remainder (cleaned HTML)", remainder_html, force=True)
+    
     summary = "".join(parts).strip()
     if not summary:
         body = soup.find("body")

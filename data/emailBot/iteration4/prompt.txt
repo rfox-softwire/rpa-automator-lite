@@ -1,0 +1,115 @@
+You are a RPA assistant that generates a Python script based on a user's instruction for interactions with web applications using the Playwright package.
+The user's original instruction was: Click through each claim email at http://localhost:3001/ and enter the details (policy number, description, claim amount and claim date)  as a new claim at http://localhost:3003
+The user's success criteria was: Every claim should be visible with the correct details in http://localhost:3003/
+Here's the original script that had the error:
+```python
+import asyncio
+from playwright.async_api import async_playwright
+
+async def main():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context()
+
+        # Two pages: inbox (3001) and new‑claim form (3003)
+        page_3001 = await context.new_page()
+        page_3003 = await context.new_page()
+
+        # 1️⃣ Open the claims inbox
+        await page_3001.goto("http://localhost:3001/")
+
+        # Locate all message items that represent claim emails
+        message_items = await page_3001.locator(".message-item").all()
+        for idx, msg in enumerate(message_items):
+            # 2️⃣ Click the email to open its detail view
+            await msg.click()
+
+            # Wait until the detail view loads (the policy number text appears)
+            await page_3001.wait_for_selector("text=Policy Number:")
+
+            # 3️⃣ Extract claim details from the opened detail view
+            prose_text = await page_3001.locator(".prose").inner_text()
+            lines = [line.strip() for line in prose_text.splitlines() if line.strip()]
+            data = {}
+            for line in lines:
+                if ":" in line:
+                    key, value = line.split(":", 1)
+                    data[key.strip().lower()] = value.strip()
+
+            policy_number = data.get("policy number", "")
+            description   = data.get("description", "")
+            amount_str    = data.get("claim amount", "").replace("£", "").replace(",", "")
+            claim_amount  = float(amount_str) if amount_str else 0.0
+            date_str      = data.get("claim date", "")
+
+            # 4️⃣ Navigate to the new‑claim form
+            await page_3003.goto("http://localhost:3003/")
+
+            # 5️⃣ Fill in the form fields
+            await page_3003.fill("#policy-number-input", policy_number)
+            await page_3003.fill("#description-input", description)
+            await page_3003.fill("#claim-amount-input", str(claim_amount))
+            await page_3003.fill("#claim-date-input", date_str)
+
+            # 6️⃣ Submit the form
+            await page_3003.click("button[type='submit']")
+
+            # 7️⃣ Verify that the claim appears in the list on 3003
+            await page_3003.wait_for_selector(f"text={policy_number}")
+
+            print(f"✅ Claim {idx + 1} ({policy_number}) submitted successfully.")
+
+            # 8️⃣ Return to the inbox for the next email
+            await page_3001.goto("http://localhost:3001/")
+
+        await browser.close()
+
+asyncio.run(main())
+```
+
+The user is trying to fix an error in their script. Here's the error that occurred:
+ [tracking] Page.wait_for_selector failed: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("text=Policy Number:") to be visible
+    24 × locator resolved to 11 elements. Proceeding with the first one: <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following…</p>
+
+Exception: TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("text=Policy Number:") to be visible
+    24 × locator resolved to 11 elements. Proceeding with the first one: <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following…</p>
+
+Traceback (last 3 frame(s)):
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_frame.py", line 369, in wait_for_selector
+    await self._channel.send(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+
+
+The script does not currently output anything
+Prior to failing its execution, http://localhost:3001/ had the following summarised HTML content:
+<!-- button -->
+<button class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors" id="refresh-btn">
+                    Refresh
+                </button>
+
+<!-- button -->
+<button class="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-100 transition-colors" id="back-to-list">
+                        Back to Inbox
+                    </button>
+
+<!-- remainder (cleaned HTML) -->
+html<html class="h-full"><head><meta/><meta/><title>(9) Claim Messages - RPA Claims Processing</title><link/></head><body class="bg-gray-100"><div class="min-h-screen flex flex-col md:flex-row"><div class="w-full md:w-64 bg-gray-800 text-white p-4 flex-shrink-0"><h4 class="text-xl font-semibold mb-6">Claim Messages</h4><div class="space-y-2"></div><div class="mt-6"><div class="text-xs text-gray-400 uppercase tracking-wider font-medium mb-2">UNREAD MESSAGES</div><div class="space-y-1"><a class="block px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-700 text-gray-200 hover:text-white transition-colors" href="#">Inbox<span class="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full">9</span></a></div></div></div><div class="flex-1 flex flex-col h-screen overflow-hidden bg-white"><div class="border-b border-gray-200 bg-white p-4"><h4 class="text-lg font-semibold">Inbox</h4></div><div class="flex-1 overflow-auto bg-white hidden"><div><div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white"><div class="flex justify-between w-full"><h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6><span class="text-xs text-gray-500">13/10/2025, 09:49:54</span></div><h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-528536</h5><p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details: Policy Number: POL-528536 Description...</p></div><div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50"><div class="flex justify-between w-full"><h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6><span class="text-xs text-gray-500">13/10/2025, 09:49:54</span></div><h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-887349</h5><p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details: Policy Number: POL-887349 Description...</p></div><div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50"><div class="flex justify-between w-full"><h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6><span class="text-xs text-gray-500">13/10/2025, 09:49:54</span></div><h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-509717</h5><p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details: Policy Number: POL-509717 Description...</p></div><div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50"><div class="flex justify-between w-full"><h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6><span class="text-xs text-gray-500">13/10/2025, 09:49:54</span></div><h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-567541</h5><p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details: Policy Number: POL-567541 Description...</p></div><div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50"><div class="flex justify-between w-full"><h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6><span class="text-xs text-gray-500">13/10/2025, 09:49:54</span></div><h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-783283</h5><p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details: Policy Number: POL-783283 Description...</p></div><div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50"><div class="flex justify-between w-full"><h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6><span class="text-xs text-gray-500">13/10/2025, 09:49:54</span></div><h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-119845</h5><p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details: Policy Number: POL-119845 Description...</p></div><div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50"><div class="flex justify-between w-full"><h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6><span class="text-xs text-gray-500">13/10/2025, 09:49:53</span></div><h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-499867</h5><p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details: Policy Number: POL-499867 Description...</p></div><div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50"><div class="flex justify-between w-full"><h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6><span class="text-xs text-gray-500">13/10/2025, 09:49:53</span></div><h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-659353</h5><p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details: Policy Number: POL-659353 Description...</p></div><div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50"><div class="flex justify-between w-full"><h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6><span class="text-xs text-gray-500">13/10/2025, 09:49:53</span></div><h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-659353</h5><p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details: Policy Number: POL-659353 Description...</p></div><div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50"><div class="flex justify-between w-full"><h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6><span class="text-xs text-gray-500">13/10/2025, 09:49:53</span></div><h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-214140</h5><p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details: Policy Number: POL-214140 Description...</p></div></div></div><div class="flex-1 flex flex-col bg-white"><div class="border-b border-gray-200 p-3 flex justify-between items-center bg-gray-50"></div><div class="p-6"><div class="mb-4"><h4 class="text-xl font-semibold text-gray-900 mb-2">New Claim - Policy #POL-528536</h4><div class="flex justify-between text-sm text-gray-500"><span>From: claim-submission@example.com</span><span class="text-gray-400">13/10/2025, 09:49:54</span></div></div><div class="border-t border-gray-200 pt-4"><div class="prose max-w-none text-gray-700">A new claim has been submitted with the following details:<br/><br/><br/>Policy Number: POL-528536<br/><br/>Description: Vehicle collision damage<br/><br/>Claim Amount: £60036<br/><br/>Claim Date: 25/05/2024<br/><br/><br/><br/>This is an automated notification.</div></div></div></div></div></div></body></html>
+Prior to failing its execution, about:blank had the following summarised HTML content:
+<!-- remainder (cleaned HTML) -->
+<html><head></head><body></body></html>
+IMPORTANT: The script should follow these rules:
+1. Use asynchronous Playwright
+2. Do not use try/catch blocks
+3. The script should be self-contained with all necessary imports
+4. The script should be executable directly (remember that 'async with' outside async function is not allowed)
+5. Do not include any if __name__ == "__main__": blocks
+
+Please generate a corrected version of the script that fixes the error while maintaining the original functionality.
+Only return the proposed python script.

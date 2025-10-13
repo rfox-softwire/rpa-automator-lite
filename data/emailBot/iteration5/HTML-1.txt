@@ -1,0 +1,321 @@
+<!DOCTYPE html><html lang="en" class="h-full"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Management System</title>
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 h-full">
+    <div class="min-h-screen flex flex-col">
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">Claim Management System</h1>
+                    <button id="newClaimBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        New Claim
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700" data-sort="policyNumber">
+                                    Policy Number
+                                    <span class="sort-indicator" data-sort="policyNumber">↕️</span>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700" data-sort="claimAmount">
+                                    Amount
+                                    <span class="sort-indicator" data-sort="claimAmount">↕️</span>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700" data-sort="claimDate">
+                                    Date
+                                    <span class="sort-indicator" data-sort="claimDate">↕️</span>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="relative px-6 py-3">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="claimsTableBody" class="bg-white divide-y divide-gray-200"><tr class="hover:bg-gray-50" data-claim-id="claim-1760358179898">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-214140
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Theft of personal belongings</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £24158
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    14/01/2024
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760358179898">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760358179525">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-659353
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Vehicle collision damage</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £79926
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    31/01/2025
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760358179525">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760358176347">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-659353
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Liability claim</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £1612
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    14/09/2024
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760358176347">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760358175993">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-499867
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Electronic equipment damage</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £96203
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    12/12/2023
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760358175993">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760358173687">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-119845
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Water damage to property</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £29989
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    11/11/2023
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760358173687">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760358170460">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-783283
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Vehicle collision damage</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £15701
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    25/10/2023
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760358170460">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760358170057">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-567541
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Water damage to property</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £27867
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    28/06/2025
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760358170057">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760358166873">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-509717
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Electronic equipment damage</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £80083
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    29/04/2024
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760358166873">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760358166505">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-887349
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Water damage to property</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £8589
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    06/01/2025
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760358166505">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760358163212">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-528536
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Vehicle collision damage</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £60036
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    25/05/2024
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760358163212">View</a>
+                </td>
+            </tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="claimDetailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Claim Details</h3>
+                <button id="closeDetailModal" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="claimDetailContent">
+
+            </div>
+        </div>
+    </div>
+
+    <div id="newClaimModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">New Claim</h3>
+                <button id="closeNewClaimModal" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="newClaimForm" class="space-y-4">
+                <div>
+                    <label for="policyNumber" class="block text-sm font-medium text-gray-700">Policy Number *</label>
+                    <input type="text" id="policyNumber" name="policyNumber" required="" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700">Description *</label>
+                    <textarea id="description" name="description" rows="3" required="" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="claimAmount" class="block text-sm font-medium text-gray-700">Claim Amount (£) *</label>
+                        <input type="number" id="claimAmount" name="claimAmount" min="0" step="0.01" required="" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="claimDate" class="block text-sm font-medium text-gray-700">Date of Claim *</label>
+                        <input type="date" id="claimDate" name="claimDate" required="" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancelNewClaim" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Submit for Review
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="/js/app.js"></script>
+
+
+</body></html>
