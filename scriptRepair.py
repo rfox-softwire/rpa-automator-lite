@@ -1,8 +1,8 @@
 from LLMClient import LLMClient
 import logging
 from pathlib import Path
-from scriptGeneration import generateScript
-from htmlSummary import summarise_html
+from script_generation import generate_script
+from html_summary import summarise_html
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,8 +24,7 @@ def read_iteration_files(iteration_dir):
                 return f.read()
         except FileNotFoundError:
             return None
-    
-    # Read each file if it exists
+
     files_content['output'] = read_if_exists(iteration_dir / 'output.txt')
     files_content['instruction'] = read_if_exists(iteration_dir / 'instruction.txt')
     files_content['script'] = read_if_exists(iteration_dir / 'scriptUnmodified.py')
@@ -75,7 +74,7 @@ def generate_repair_prompt(files_content):
         "4. The script should be executable directly (remember that 'async with' outside async function is not allowed)\n"
         "5. Do not include any if __name__ == \"__main__\": blocks\n\n"
         "Please generate a corrected version of the script that fixes the error while maintaining the original functionality.\n",
-        "Only return the proposed python script."
+        "Only return the proposed Python script."
     ])
     return "".join(prompt)
 
@@ -95,6 +94,6 @@ def main():
 
     prompt = generate_repair_prompt(current_files)
 
-    generateScript(new_iteration_filepath, user_instruction, success_criteria, prompt)
+    generate_script(new_iteration_filepath, user_instruction, success_criteria, prompt)
 
 main()

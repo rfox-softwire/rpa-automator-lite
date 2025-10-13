@@ -1,4 +1,4 @@
-from LLMClient import LLMClient
+from llm_client import LLMClient
 import logging
 from pathlib import Path
 from scriptTracking import create_tracked_script
@@ -6,7 +6,7 @@ from scriptTracking import create_tracked_script
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def generateScript(iteration_filepath, user_instruction, success_criteria, prompt):
+def generate_script(iteration_filepath, user_instruction, success_criteria, prompt):
     iteration_filepath.mkdir(parents = True, exist_ok = True)
     with open(iteration_filepath / "prompt.txt", "w", encoding="utf-8") as f:
         f.write(prompt)
@@ -15,8 +15,8 @@ def generateScript(iteration_filepath, user_instruction, success_criteria, promp
     with open(iteration_filepath / "instruction.txt", "w", encoding="utf-8") as f:
         f.write(user_instruction)
     
-    llmClient = LLMClient()
-    llm_response = llmClient.send_prompt(prompt, temperature = 0.4)
+    llm_client = LLMClient()
+    llm_response = llm_client.send_prompt(prompt, temperature = 0.4)
     llm_response_content = llm_response["choices"][0]["message"]["content"]
 
     with open(iteration_filepath / "fullResponse.txt", "w", encoding="utf-8") as f:

@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from scriptGeneration import generateScript
+from script_generation import generate_script
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,11 +17,11 @@ def generate_initial_prompt(instruction, success_criteria):
         "3. The script should be self-contained with all necessary imports\n"
         "4. The script should be executable directly (remember that 'async with' outside async function is not allowed)\n"
         "5. Do not include any if __name__ == \"__main__\": blocks\n\n"
-        "Only return the proposed python script."
+        "Only return the proposed Python script."
     )
     return prompt
 
-def clear_directory(directory: Path):
+def clear_directory(directory):
     if not directory.exists():
         return
         
@@ -36,6 +36,7 @@ def clear_directory(directory: Path):
 
 def main():
     bot_name = input("Enter name for bot: ")
+    
     output_directory = Path(f"data/{bot_name}")
     clear_directory(output_directory)
     output_directory.mkdir(parents = True)
@@ -46,6 +47,6 @@ def main():
     success_criteria = input("Enter success criteria for instructions: ")
     prompt = generate_initial_prompt(user_instruction, success_criteria)
 
-    generateScript(iteration_filepath, user_instruction, success_criteria, prompt)
+    generate_script(iteration_filepath, user_instruction, success_criteria, prompt)
 
 main()
