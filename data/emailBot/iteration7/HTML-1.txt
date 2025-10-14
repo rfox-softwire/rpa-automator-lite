@@ -169,7 +169,7 @@ Description...</p>
                     </div>
                 </div></div>
 
-            <div class="hidden flex-1 flex flex-col bg-white" id="message-view">
+            <div class="flex-1 flex-col bg-white hidden" id="message-view">
                 <div class="border-b border-gray-200 p-3 flex justify-between items-center bg-gray-50">
                     <button class="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-100 transition-colors" id="back-to-list">
                         Back to Inbox
@@ -177,14 +177,14 @@ Description...</p>
                 </div>
                 <div class="p-6">
                     <div class="mb-4">
-                        <h4 id="message-subject" class="text-xl font-semibold text-gray-900 mb-2">Loading...</h4>
+                        <h4 id="message-subject" class="text-xl font-semibold text-gray-900 mb-2">New Claim - Policy #POL-659353</h4>
                         <div class="flex justify-between text-sm text-gray-500">
-                            <span id="message-from">From: Loading...</span>
-                            <span id="message-date" class="text-gray-400">Just now</span>
+                            <span id="message-from">From: claim-submission@example.com</span>
+                            <span id="message-date" class="text-gray-400">14/10/2025, 13:59:24</span>
                         </div>
                     </div>
                     <div class="border-t border-gray-200 pt-4">
-                        <div id="message-body" class="prose max-w-none text-gray-700">Loading message content...</div>
+                        <div id="message-body" class="prose max-w-none text-gray-700">A new claim has been submitted with the following details:<br><br><br>Policy Number: POL-659353 <br><br>Description: Liability claim <br><br>Claim Amount: £1612 <br><br>Claim Date: 14/09/2024 <br><br><br><br>This is an automated notification.</div>
                     </div>
                 </div>
             </div>

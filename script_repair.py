@@ -1,4 +1,4 @@
-from LLMClient import LLMClient
+from llm_client import LLMClient
 import logging
 from pathlib import Path
 from script_generation import generate_script

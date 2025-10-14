@@ -1,7 +1,7 @@
 from llm_client import LLMClient
 import logging
 from pathlib import Path
-from scriptTracking import create_tracked_script
+from script_tracking import create_tracked_script
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 from playwright.async_api import async_playwright
 
 async def main():
@@ -44,9 +45,11 @@ async def main():
             claim_amount  = float(amount_str) if amount_str else 0.0
             date_str      = data.get("claim date", "")
 
-            # Convert DD/MM/YYYY to YYYY-MM-DD for the <input type="date">
-            day, month, year = date_str.split("/")
-            iso_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
+            # Convert the date to yyyy-mm-dd format for <input type="date">
+            try:
+                claim_date_iso = datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
+            except ValueError:
+                claim_date_iso = ""
 
             # 4️⃣ Navigate to the new‑claim form page
             await page_3003.goto("http://localhost:3003/")
@@ -62,7 +65,8 @@ async def main():
             await page_3003.fill("#policyNumber", policy_number)
             await page_3003.fill("#description", description)
             await page_3003.fill("#claimAmount", str(claim_amount))
-            await page_3003.fill("#claimDate", iso_date)
+            if claim_date_iso:
+                await page_3003.fill("#claimDate", claim_date_iso)
 
             # 7️⃣ Submit the form
             await page_3003.click("button[type='submit']")

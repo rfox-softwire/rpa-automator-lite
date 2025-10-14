@@ -17,6 +17,8 @@ retained_attributes = {
 removed_elements = ["script", "style", "noscript", "svg", "img"]
 
 def keep_retained_attributes(tag):
+    if tag.attributes is None:
+        return
     if "style" in tag.attributes:
         del tag.attributes["style"]
     keep = retained_attributes.get(tag.name, set())
@@ -62,8 +64,8 @@ def summarise_text_from_table(table):
         for table_cell in table_cells:
             table_cell_text = " ".join(table_cell.get_text(" ", strip=True).split())
             table_row_value_list.append(table_cell_text)
-        table_rows.append("\t".join(table_row_value_list))
-    return "\n".join(table_rows)
+        table_rows_list.append("\t".join(table_row_value_list))
+    return "\n".join(table_rows_list)
 
 def summarise_table(inTable):
     table = deepcopy(inTable)
@@ -117,7 +119,7 @@ def summarise_html(html_content, max_length = 8000):
         button_text = str(button).strip()
         if button_text and button_text not in seen_buttons:
             budget -= add_to_summary("button", button_text)
-            seen_buttons.add_to_summary(button_text)
+            seen_buttons.add(button_text)
 
     tables = soup.find_all("table")
     if tables:
@@ -144,12 +146,13 @@ def summarise_html(html_content, max_length = 8000):
 
     for section_tag in ["header", "footer", "main", "article", "section", "aside"]:
         section = soup.find(section_tag)
-        links = []
-        for a in section.find_all("a", href=True):
-            if a.get_text(strip=True):
-                links.append(str(a))
-        if links:
-            budget -= add_to_summary(f"links in <{section_tag}>", "\n".join(links))
+        if section:
+            links = []
+            for a in section.find_all("a", href=True):
+                if a.get_text(strip=True):
+                    links.append(str(a))
+            if links:
+                budget -= add_to_summary(f"links in <{section_tag}>", "\n".join(links))
 
     if budget > 0:
         full_html_stripped = strip_full_html(soup)

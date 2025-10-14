@@ -26,7 +26,7 @@ async def main():
 
         for idx in range(count):
             # 2️⃣ Open the email detail view
-            await page_3001.click(f"{message_selector}:nth-child({idx + 1})")
+            await page_3001.locator(message_selector).nth(idx).click()
 
             # Wait until the detail modal is visible
             await page_3001.wait_for_selector("div.prose", state="visible")
@@ -78,8 +78,8 @@ async def main():
             print(f"✅ Claim {idx + 1} ({policy_number}) submitted successfully.")
 
             # 9️⃣ Return to the inbox for the next email
-            await page_3001.goto("http://localhost:3001/")
-            await page_3001.click('a[href="#"]')
+            await page_3001.click('#back-to-list')
+            await page_3001.wait_for_selector(message_selector)
 
         await browser.close()
 
