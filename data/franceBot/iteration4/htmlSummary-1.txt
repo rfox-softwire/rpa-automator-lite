@@ -1,0 +1,171 @@
+<!-- form -->
+<form action="/w/index.php" class="cdx-search-input cdx-search-input--has-end-button" id="searchform">
+<div class="cdx-search-input__input-wrapper" data-search-loc="header-moved" id="simpleSearch">
+<div class="cdx-text-input cdx-text-input--has-start-icon">
+<input accesskey="f" aria-label="Search Wikipedia" autocapitalize="sentences" autocomplete="off" class="cdx-text-input__input mw-searchInput" id="searchInput" name="search" placeholder="Search Wikipedia" spellcheck="false" title="Search Wikipedia [alt-f]" type="search"/>
+<span class="cdx-text-input__icon cdx-text-input__start-icon"></span>
+</div>
+<input name="title" type="hidden" value="Special:Search"/>
+</div>
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+</form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-0" id="skin-client-pref-vector-feature-custom-font-size-value-0" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="0"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-0"><span class="cdx-label__label__text">Small</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-1" id="skin-client-pref-vector-feature-custom-font-size-value-1" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="1"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-1"><span class="cdx-label__label__text">Standard</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-2" id="skin-client-pref-vector-feature-custom-font-size-value-2" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="2"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-2"><span class="cdx-label__label__text">Large</span></label></div></form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-limited-width-value-1" id="skin-client-pref-vector-feature-limited-width-value-1" name="skin-client-pref-vector-feature-limited-width-group" type="radio" value="1"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-limited-width-value-1"><span class="cdx-label__label__text">Standard</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-limited-width-value-0" id="skin-client-pref-vector-feature-limited-width-value-0" name="skin-client-pref-vector-feature-limited-width-group" type="radio" value="0"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-limited-width-value-0"><span class="cdx-label__label__text">Wide</span></label></div></form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-os" id="skin-client-pref-skin-theme-value-os" name="skin-client-pref-skin-theme-group" type="radio" value="os"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-os"><span class="cdx-label__label__text">Automatic</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-day" id="skin-client-pref-skin-theme-value-day" name="skin-client-pref-skin-theme-group" type="radio" value="day"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-day"><span class="cdx-label__label__text">Light</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-night" id="skin-client-pref-skin-theme-value-night" name="skin-client-pref-skin-theme-group" type="radio" value="night"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-night"><span class="cdx-label__label__text">Dark</span></label></div></form>
+
+<!-- form -->
+<form action="/w/index.php" class="cdx-search-input cdx-search-input--has-end-button" id="vector-sticky-search-form">
+<div class="cdx-search-input__input-wrapper" data-search-loc="header-moved">
+<div class="cdx-text-input cdx-text-input--has-start-icon">
+<input autocomplete="off" class="cdx-text-input__input mw-searchInput" name="search" placeholder="Search Wikipedia" type="search"/>
+<span class="cdx-text-input__icon cdx-text-input__start-icon"></span>
+</div>
+<input name="title" type="hidden" value="Special:Search"/>
+</div>
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+</form>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-main-menu.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-main-menu.unpin">hide</button>
+
+<!-- button -->
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-toc.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-toc.unpin">hide</button>
+
+<!-- button -->
+<button aria-controls="toc-History-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle History subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Geography-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Geography subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Politics-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Politics subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Economy-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Economy subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Demographics-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Demographics subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Culture-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Culture subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-External_links-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle External links subsection</span>
+</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-page-tools.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-page-tools.unpin">hide</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-appearance.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-appearance.unpin">hide</button>
+
+<!-- button -->
+<button aria-expanded="false" class="mw-collapsible-toggle mw-collapsible-toggle-default mw-collapsible-toggle-collapsed" tabindex="0" type="button"><span class="mw-collapsible-text">show</span></button>
+
+<!-- button -->
+<button aria-expanded="false" class="mw-collapsible-toggle mw-collapsible-toggle-default mw-collapsible-toggle-collapsed" style="color: inherit;" tabindex="0" type="button"><span class="mw-collapsible-text" style="color: inherit;">show</span></button>
+
+<!-- button -->
+<button class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-sticky-header-search-toggle" data-event-name="ui.vector-sticky-search-form.icon" tabindex="-1"><span class="vector-icon mw-ui-icon-search mw-ui-icon-wikimedia-search"></span>
+<span>Search</span>
+</button>
+
+<!-- button -->
+<button class="cdx-button cdx-button--weight-quiet mw-interlanguage-selector" data-event-name="ui.dropdown-p-lang-btn-sticky-header" id="p-lang-btn-sticky-header" tabindex="-1"><span class="vector-icon mw-ui-icon-wikimedia-language mw-ui-icon-wikimedia-wikimedia-language"></span>
+<span>310 languages</span>
+</button>
+
+<!-- table (text only) -->
+<pre>French Republic République française
+Flag Emblem [ discuss ]
+Motto: " Liberté, égalité, fraternité " Liberty, equality, fraternity
+Anthem: " La Marseillaise " Duration: 1 minute and 20 seconds. 1:20
+Labelled map Show globe Metropolitan France (European part of France) in Europe France and its neighbours Show France, its overseas territories and its exclusive economic zones Show all
+Capital and largest city	Paris 48°51′N 2°21′E ﻿ / ﻿ 48.850°N 2.350°E ﻿ / 48.850; 2.350
+Official language and national language	French [ a ]
+Nationality (2021) [ 1 ]	92.2% French 7.8% other
+
+Religion (2021) [ 2 ]	50% Christianity 33% irreligion 4% Islam 4% other religions
+Demonym	French
+Government	Unitary semi-presidential republic
+
+• President	Emmanuel Macron
+• Prime Minister	Sébastien Lecornu
+• President of the Senate	Gérard Larcher
+• President of the National Assembly	Yaël Braun-Pivet
+
+Legislature	Parliament
+• Upper house	Senate
+• Lower house	National Assembly
+Establishment
+
+• Kingdom of the West Franks — Treaty of Verdun	10 August 843
+• French Republic — French First Republic	22 September 1792
+• Current constitution — French Fifth Republic	4 October 1958
+
+Area
+• Total	632,702.3 km 2 (244,287.7 sq mi) (including metropolitan France and overseas France and excluding Terre Adelie ) [ 4 ] ( 42nd )
+• Water (%)	0.86 [ 3 ]
+• Metropolitan France ( DGCL )	543,941 km 2 (210,017 sq mi) [ 5 ] ( 50th )
+• Metropolitan France ( INSEE )	543,908.3 km 2 (210,004.2 sq mi) [ 4 ] [ b ] ( 50th )
+Population
+• January 2025 estimate	68,605,616 [ 6 ] ( 21st )
+• Density	108/km 2 (281/sq mi) ( 106th )
+• Metropolitan France, estimate as of January 2025 [update]	66,351,959 [ 6 ] ( 21st )
+• Density	122/km 2 (316.0/sq mi) ( 97th )
+GDP ( PPP )	2025 estimate
+• Total	$4.504 trillion [ 7 ] ( 9th )
+• Per capita	$65,626 [ 7 ] ( 25th )
+GDP (nominal)	2025 estimate
+• Total	$3.211 trillion [ 7 ] ( 7th )
+• Per capita	$46,792 [ 7 ] ( 22nd )
+Gini (2022)	29.8 [ 8 ] low inequality
+HDI (2023)	0.920 [ 9 ] very high ( 26th )
+Currency	Euro ( € ) ( EUR ) [ c ] CFP franc (XPF) [ d ]
+Time zone	UTC +1 ( CET [ e ] )
+• Summer ( DST )	UTC +2 ( CEST )
+Calling code	+33 [ f ]
+ISO 3166 code	FR
+Internet TLD	.fr [ g ]
+Source gives area of metropolitan France as 551,500 km 2 (212,900 sq mi) and lists overseas regions separately, whose areas sum to 89,179 km 2 (34,432 sq mi). Adding these give the total shown here for the entire French Republic. The World Factbook reports the total as 643,801 km 2 (248,573 sq mi).</pre>

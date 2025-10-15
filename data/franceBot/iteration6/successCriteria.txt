@@ -1,0 +1,1 @@
+Print a statement of the form: The population of France is x. x should be a reasonable number for France's population

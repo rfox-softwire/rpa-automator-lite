@@ -1,0 +1,40 @@
+```python
+import asyncio
+from playwright.async_api import async_playwright
+
+async def main():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context()
+        page = await context.new_page()
+
+        # 1. Open Wikipedia homepage
+        await page.goto("https://www.wikipedia.org/")
+
+        # 2. Search for "France"
+        await page.fill("input#searchInput", "France")
+        await page.press("input#searchInput", "Enter")
+
+        # 3. Wait for the article page to load and click on the first search result if needed
+        # (If we were taken directly to the article, this step is harmless)
+        await page.wait_for_selector("h1")  # ensure article title is present
+
+        # 4. Locate the population value in the infobox
+        # The population row usually contains a <th> with text "Population" and the value in the following <td>
+        population_locator = page.locator(
+            "//table[contains(@class, 'infobox')]"
+            "//tr[th[contains(., 'Population')]]/td[last()]"
+        )
+        await population_locator.wait_for(state="visible")
+
+        # 5. Extract the text and clean it
+        raw_text = await population_locator.inner_text()
+        # Remove any footnote markers like [1], [2] etc.
+        cleaned_text = "".join(ch for ch in raw_text if not (ch.isdigit() or ch == '[' or ch == ']')).strip()
+
+        print(f"The population of France is {cleaned_text}")
+
+        await browser.close()
+
+asyncio.run(main())
+```

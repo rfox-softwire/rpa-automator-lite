@@ -1,0 +1,16 @@
+[tracking] Locator.wait_for failed: Locator.wait_for: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("//table[contains(@class,'infobox')]//tr[th[contains(.,'Population')]]/td[1]") to be visible
+
+Exception: TimeoutError: Locator.wait_for: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("//table[contains(@class,'infobox')]//tr[th[contains(.,'Population')]]/td[1]") to be visible
+
+Traceback (last {MAX_TRACEBACK_LENGTH} frame(s)):
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_frame.py", line 369, in wait_for_selector
+    await self._channel.send(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+

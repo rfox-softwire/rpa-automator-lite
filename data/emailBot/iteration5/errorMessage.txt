@@ -2,7 +2,7 @@
 Call log:
   - waiting for locator("#claimDate")
     - locator resolved to <input type="date" required="" id="claimDate" name="claimDate" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"/>
-    - fill("25/05/2024")
+    - fill("14/01/2024")
   - attempting fill action
     - waiting for element to be visible, enabled and editable
 
@@ -10,7 +10,7 @@ Exception: Error: Page.fill: Error: Malformed value
 Call log:
   - waiting for locator("#claimDate")
     - locator resolved to <input type="date" required="" id="claimDate" name="claimDate" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"/>
-    - fill("25/05/2024")
+    - fill("14/01/2024")
   - attempting fill action
     - waiting for element to be visible, enabled and editable
 

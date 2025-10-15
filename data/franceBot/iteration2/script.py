@@ -1,9 +1,4 @@
-import os
-import re
-from pathlib import Path
 
-def generate_prelude(timeout_seconds):
-    return f"""
 import sys, os, asyncio, contextlib, atexit, traceback
 from pathlib import Path
 import inspect
@@ -21,9 +16,9 @@ LAST_PAGE = None
 LAST_BROWSER = None
 IS_SNAPSHOT_TAKEN = False
 IS_SNAPSHOTTING = False
-DEFAULT_TIMEOUT = {int(timeout_seconds * 1000)} 
+DEFAULT_TIMEOUT = 10000 
 MAX_TRACEBACK_LENGTH = 3
-EXCLUDED_METHODS = {"expect_event", "wait_for_event", "on", "off", "route", "unroute", "content"}
+EXCLUDED_METHODS = ('expect_event', 'wait_for_event', 'on', 'off', 'route', 'unroute', 'content')
 
 page_content_reference = Page.content
 async def save_one_page(page, page_index):
@@ -33,8 +28,8 @@ async def save_one_page(page, page_index):
     html = await page_content_reference(page)
     current_url = getattr(page, "url", "")
 
-    html_path = base_directory / f"HTML-{{page_index}}.txt"
-    url_path = base_directory / f"url-{{page_index}}.txt"
+    html_path = base_directory / f"HTML-{page_index}.txt"
+    url_path = base_directory / f"url-{page_index}.txt"
 
     html_path.write_text(html, encoding="utf-8")
     url_path.write_text(current_url, encoding="utf-8")
@@ -143,7 +138,7 @@ def create_async_method_wrapper(method_name, playwright_class):
                     page = await get_page_from_playwright_element(self)
                     await save_all_pages(page)
             finally:
-                print(f"[tracking] {{playwright_class.__name__}}.{{method_name}} failed: {{error}}", file=sys.stderr)
+                print(f"[tracking] {playwright_class.__name__}.{method_name} failed: {error}", file=sys.stderr)
             raise
     
     return wrapper_function
@@ -157,7 +152,7 @@ def wrap_async_methods(playwright_class):
         except Exception:
             continue
         if inspect.iscoroutinefunction(method):
-            tracker_added = f"__tracker_wrapped_{{name}}__"
+            tracker_added = f"__tracker_wrapped_{name}__"
             if getattr(playwright_class, tracker_added, False):
                 continue
             try:
@@ -185,7 +180,7 @@ def create_sync_selector_wrapper(method_name):
                 if not IS_SNAPSHOT_TAKEN and not IS_SNAPSHOTTING:
                     with contextlib.suppress(Exception):
                         asyncio.run(save_all_pages(self))
-            print(f"[tracking] Page.{{method_name}} failed (sync): {{error}}", file=sys.stderr)
+            print(f"[tracking] Page.{method_name} failed (sync): {error}", file=sys.stderr)
             raise
     return wrapper_function
 
@@ -217,8 +212,8 @@ def exception_hook(exception_type, exception_value, exception_traceback):
                 pass
 
     try:
-        print(f"Exception: {{exception_type.__name__}}: {{exception_value}}", file=sys.stderr)
-        print("Traceback (last {{MAX_TRACEBACK_LENGTH}} frame(s)):", file=sys.stderr)
+        print(f"Exception: {exception_type.__name__}: {exception_value}", file=sys.stderr)
+        print("Traceback (last {MAX_TRACEBACK_LENGTH} frame(s)):", file=sys.stderr)
         print(format_traceback(exception_value, MAX_TRACEBACK_LENGTH), file=sys.stderr)
         sys.stderr.flush()
     except Exception:
@@ -337,29 +332,41 @@ def snapshot_then_close_on_exit():
             asyncio.run(close_browser())
         except Exception:
             pass
-"""
 
-def strip_async_playwright_imports(content):
-    pattern = r'^[ \t]*from[ \t]+playwright\.async_api[ \t]+import[ \t]+.*\basync_playwright\b.*$'
-    return re.sub(pattern, "", content, flags=re.MULTILINE)
+import asyncio
 
-def strip_asyncio_imports(contents):
-    contents = re.sub(r"^\s*from\s+asyncio\s+import\s+.+$", "", contents, flags=re.MULTILINE)
-    contents = re.sub(r"^\s*import\s+asyncio\s*(?:#.*)?$", "", contents, flags=re.MULTILINE)
-    return contents
+import re
 
-def create_tracked_script(unmodified_script_path, output_script_path, timeout_seconds=5):
-    with open(unmodified_script_path, 'r', encoding='utf-8') as f:
-        unmodified_content = f.read()
+async def main():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context()
+        page = await context.new_page()
 
-    unmodified_content = strip_async_playwright_imports(unmodified_content)
-    unmodified_content = strip_asyncio_imports(unmodified_content)
-    
-    parts = []
-    parts.append(generate_prelude(timeout_seconds))
-    parts.append(unmodified_content)
+        # 1. Open Wikipedia homepage
+        await page.goto("https://www.wikipedia.org/")
 
-    final_script = "\n".join(parts)
+        # 2. Search for "France"
+        await page.fill("input#searchInput", "France")
+        await page.press("input#searchInput", "Enter")
 
-    with open(output_script_path, 'w', encoding='utf-8') as f:
-        f.write(final_script)
+        # 3. Wait until the article title is visible (ensures we are on the France page)
+        await page.wait_for_selector("h1", timeout=15000)
+
+        # 4. Locate the population value in the infobox
+        #    The first <td> after a <th> that contains "Population" usually holds the estimate.
+        population_locator = page.locator(
+            "//table[contains(@class,'infobox')]"
+            "//tr[th[contains(.,'Population')]]/td[1]"
+        )
+        await population_locator.wait_for(state="visible", timeout=15000)
+
+        # 5. Extract and clean the text
+        raw_text = await population_locator.inner_text()
+        cleaned_text = re.sub(r"\[\d+\]", "", raw_text).strip()
+
+        print(f"The population of France is {cleaned_text}")
+
+        await browser.close()
+
+asyncio.run(main())

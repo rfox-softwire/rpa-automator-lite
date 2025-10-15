@@ -54,19 +54,6 @@ def minify_text_within_table_cell(node):
             html_element.attributes = {}
             continue
 
-def summarise_text_from_table(table):
-    table_rows_list = []
-    for table_row in table.find_all("tr"):
-        table_cells = table_row.find_all(["th", "td"])
-        if not table_cells:
-            continue
-        table_row_value_list = []
-        for table_cell in table_cells:
-            table_cell_text = " ".join(table_cell.get_text(" ", strip=True).split())
-            table_row_value_list.append(table_cell_text)
-        table_rows_list.append("\t".join(table_row_value_list))
-    return "\n".join(table_rows_list)
-
 def summarise_table(inTable):
     table = deepcopy(inTable)
     for element in table.find_all(removed_elements):
@@ -95,7 +82,7 @@ def strip_full_html(inSoup):
     remove_leading_whitespace(soup)
     return soup
 
-def summarise_html(html_content, max_length = 8000):
+def summarise_html(html_content, max_length = 15000):
     soup = BeautifulSoup(html_content, "html.parser")
 
     for html_element in soup(removed_elements):
@@ -124,16 +111,12 @@ def summarise_html(html_content, max_length = 8000):
     tables = soup.find_all("table")
     if tables:
         first_table = deepcopy(tables[0])
-        summarised_table_html = summarise_table(first_table)
-        if len(summarised_table_html) <= budget or budget == max_length:
-            budget -= add_to_summary("table (minified HTML)", summarised_table_html, force=True)
-        else:
-            tsv = summarise_text_from_table(first_table)
-            budget -= add_to_summary("table (text only)", f"<pre>{tsv}</pre>", force=True)
-
+        first_table_html = summarise_table(first_table)
+        budget -= add_to_summary("table", first_table_html, force=True)         
+            
         for table in tables[1:]:
-            tsv = summarise_text_from_table(table)
-            budget -= add_to_summary("table (text only)", f"<pre>{tsv}</pre>")
+            table_html = summarise_table(table)
+            budget -= add_to_summary("table", table_html)
 
     nav_elements = soup.find_all(["nav"])
     nav_elements += soup.find_all(["ul", "div"], class_=re.compile(r"(nav|menu)", re.I))
@@ -142,7 +125,7 @@ def summarise_html(html_content, max_length = 8000):
         nav_element_text = str(nav_element).strip()
         if nav_element_text and nav_element_text not in seen_nav_elements:
             budget -= add_to_summary("nav", nav_element_text)
-            seen_nav_elements.add_to_summary(nav_element_text)
+            seen_nav_elements.add(nav_element_text)
 
     for section_tag in ["header", "footer", "main", "article", "section", "aside"]:
         section = soup.find(section_tag)
