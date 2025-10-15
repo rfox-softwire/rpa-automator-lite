@@ -78,8 +78,7 @@ def generate_repair_prompt(files_content):
     ])
     return "".join(prompt)
 
-def main():
-    bot_name = input("Enter name for bot: ")
+def repair_bot_script(bot_name):
     base_directory = Path(f"data/{bot_name}")
 
     base_path = Path(base_directory)
@@ -96,4 +95,7 @@ def main():
 
     generate_script(new_iteration_filepath, user_instruction, success_criteria, prompt)
 
-main()
+    return new_iteration_filepath
+
+bot_name = input("Enter name for bot: ")
+repair_bot_script(bot_name)

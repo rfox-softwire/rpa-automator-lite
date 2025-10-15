@@ -34,19 +34,16 @@ def clear_directory(directory):
     if directory.exists():
         directory.rmdir()
 
-def main():
-    bot_name = input("Enter name for bot: ")
-    
+def initiate_bot_script(bot_name, user_instruction, success_criteria):
     output_directory = Path(f"data/{bot_name}")
     clear_directory(output_directory)
     output_directory.mkdir(parents = True)
-
     iteration_filepath = output_directory / "iteration1"
-
-    user_instruction = input("Enter your instruction: ")
-    success_criteria = input("Enter success criteria for instructions: ")
     prompt = generate_initial_prompt(user_instruction, success_criteria)
-
     generate_script(iteration_filepath, user_instruction, success_criteria, prompt)
+    return iteration_filepath
 
-main()
+bot_name = input("Enter name for bot: ")
+user_instruction = input("Enter your instruction: ")
+success_criteria = input("Enter success criteria for instructions: ")
+initiate_bot_script(bot_name, user_instruction, success_criteria)
