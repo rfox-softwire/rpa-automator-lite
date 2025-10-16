@@ -38,20 +38,22 @@ def load_bots():
         data_directory.mkdir()
         return bots
 
-    for bot_directory in data_directory.iterdir():
+    for index, bot_directory in enumerate(data_directory.iterdir()):
         if not bot_directory.is_dir():
             continue
         iterations = [iteration_directory for iteration_directory in bot_directory.iterdir() if iteration_directory.is_dir()]
         if not iterations:
             continue
         latest_iteration = max(iterations, key=lambda x: int(x.name.split("iteration")[1]))
-        bots[bot_directory.name] = {
+        bot_id = str(index)
+        bots[bot_id] = {
+            "id": bot_id,
             "name": bot_directory.name,
             "instruction": safe_read_text(latest_iteration / "instruction.txt"),
             "success_criteria": safe_read_text(latest_iteration / "successCriteria.txt"),
             "scriptUnmodified": latest_iteration / "scriptUnmodified.py",
             "script": latest_iteration / "script.py",
-            "status": "completed"
+            "status": "ready"
         }
     return bots
 
@@ -64,7 +66,7 @@ async def generate_initial_script_task(bot_id, bot_data):
         iteration_filepath = initiate_bot_script(bot_data["name"], bot_data["instruction"], bot_data["success_criteria"])
 
         bots_db[bot_id].update({
-            "status": "completed",
+            "status": "ready",
             "scriptUnmodified": iteration_filepath / "scriptUnmodified.py",
             "script": iteration_filepath / "script.py"
         })
@@ -81,7 +83,7 @@ async def generate_repair_script_task(bot_id, bot_data):
         new_iteration_filepath = repair_bot_script(bot_data["name"])
         
         bots_db[bot_id].update({
-            "status": "completed",
+            "status": "ready",
             "scriptUnmodified": new_iteration_filepath / "scriptUnmodified.py",
             "script": new_iteration_filepath / "script.py"
         })
