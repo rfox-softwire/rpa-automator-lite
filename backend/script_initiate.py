@@ -43,7 +43,11 @@ def initiate_bot_script(bot_name, user_instruction, success_criteria):
     generate_script(iteration_filepath, user_instruction, success_criteria, prompt)
     return iteration_filepath
 
-bot_name = input("Enter name for bot: ")
-user_instruction = input("Enter your instruction: ")
-success_criteria = input("Enter success criteria for instructions: ")
-initiate_bot_script(bot_name, user_instruction, success_criteria)
+def main():
+    bot_name = input("Enter name for bot: ")
+    user_instruction = input("Enter your instruction: ")
+    success_criteria = input("Enter success criteria for instructions: ")
+    initiate_bot_script(bot_name, user_instruction, success_criteria)
+
+if __name__ == "__main__":
+    main()

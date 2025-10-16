@@ -97,5 +97,9 @@ def repair_bot_script(bot_name):
 
     return new_iteration_filepath
 
-bot_name = input("Enter name for bot: ")
-repair_bot_script(bot_name)
+def main():
+    bot_name = input("Enter name for bot: ")
+    repair_bot_script(bot_name)
+
+if __name__ == "__main__":
+    main()
