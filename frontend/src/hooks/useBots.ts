@@ -21,5 +21,5 @@ export const useBots = () => {
         fetchBotsData();
     }, []);
 
-    return { bots, loading, error };
+    return bots;
 }

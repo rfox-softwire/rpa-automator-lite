@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 export interface Bot {
     id: string;
@@ -23,9 +23,33 @@ const api = axios.create({
 export const fetchBots = async (): Promise<Bot[]> => {
     try {
         const response = await api.get("/bots");
+        console.log('Bots API Response:', response.data);
         return response.data;
     } catch (error) {
         console.error("Error fetching bots:", error);
+        throw error;
+    }
+}
+
+export const generateBotScript = async (botName: string, instruction: string, successCriteria: string): Promise<Bot> => {
+    try {
+        const response = await api.post('/bots', {
+            name: botName.trim(),
+            instruction: instruction.trim(),
+            success_criteria: successCriteria.trim()
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error creating bot and generating script:", error);
+        if (axios.isAxiosError(error)) {
+            console.error("Response data:", error.response?.data);
+            console.error("Status:", error.response?.status);
+        }
         throw error;
     }
 }

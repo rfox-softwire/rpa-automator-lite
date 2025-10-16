@@ -1,0 +1,26 @@
+```python
+import asyncio
+from playwright.async_api import async_playwright
+
+async def main():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
+        await page.goto("https://en.wikipedia.org/wiki/Spain")
+
+        # Wait for the infobox to load
+        await page.wait_for_selector(".infobox")
+
+        # Locate the population value in the infobox
+        population_element = await page.locator(
+            "//th[normalize-space()='Population']"
+            "/following-sibling::td[1]"
+        ).first
+
+        population_text = await population_element.inner_text()
+        print(f"The population of Spain is {population_text}")
+
+        await browser.close()
+
+asyncio.run(main())
+```

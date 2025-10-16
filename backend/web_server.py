@@ -26,7 +26,7 @@ app.add_middleware(
 
 def safe_read_text(filepath, default = "Not found"):
         try:
-            return filepath.read_text(encoding='utf-8').strip()
+            return filepath.read_text(encoding='utf-8')
         except (FileNotFoundError, UnicodeDecodeError):
             return default
 
@@ -51,8 +51,8 @@ def load_bots():
             "name": bot_directory.name,
             "instruction": safe_read_text(latest_iteration / "instruction.txt"),
             "success_criteria": safe_read_text(latest_iteration / "successCriteria.txt"),
-            "scriptUnmodified": latest_iteration / "scriptUnmodified.py",
-            "script": latest_iteration / "script.py",
+            "scriptUnmodified": safe_read_text(latest_iteration / "scriptUnmodified.py"),
+            "script": safe_read_text(latest_iteration / "script.py"),
             "status": "ready"
         }
     return bots
@@ -67,8 +67,8 @@ async def generate_initial_script_task(bot_id, bot_data):
 
         bots_db[bot_id].update({
             "status": "ready",
-            "scriptUnmodified": iteration_filepath / "scriptUnmodified.py",
-            "script": iteration_filepath / "script.py"
+            "scriptUnmodified": safe_read_text(iteration_filepath / "scriptUnmodified.py"),
+            "script": safe_read_text(iteration_filepath / "script.py")
         })
     except Exception as error:
         logger.error(f"Error generating script for bot {bot_id}: {error}")
@@ -84,8 +84,8 @@ async def generate_repair_script_task(bot_id, bot_data):
         
         bots_db[bot_id].update({
             "status": "ready",
-            "scriptUnmodified": new_iteration_filepath / "scriptUnmodified.py",
-            "script": new_iteration_filepath / "script.py"
+            "scriptUnmodified": safe_read_text(new_iteration_filepath / "scriptUnmodified.py"),
+            "script": safe_read_text(new_iteration_filepath / "script.py")
         })
     except Exception as error:
         logger.error(f"Error generating repair script for bot {bot_id}: {error}")
@@ -104,9 +104,11 @@ class BotResponse(BotRequest):
     status: str = "pending"
     script_path: str = None
     error: str = None
+    scriptUnmodified: str = None
+    script: str = None
 
 @app.post("/api/bots", response_model=BotResponse, status_code=201)
-async def create_bot(bot, background_tasks):
+async def create_bot(bot: BotRequest, background_tasks: BackgroundTasks):
     bot_id = str(len(bots_db)+1)
     bot_data = bot.dict()
     bot_data["id"] = bot_id
