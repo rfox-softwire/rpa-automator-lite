@@ -5,22 +5,13 @@ import { runBotScript } from "../../services/api";
 export const BotScript: React.FC<BotScriptProps> = ({
     botScript,
     isNewBot,
-    botId
+    botId,
+    onRunScript,
+    isRunning
 }) => {
-    const [isRunning, setIsRunning] = useState(false);
-
-    const handleRunScript = async () => {
+    const handleRunClick = async () => {
         if (!botId) return;
-        
-        setIsRunning(true);
-        
-        try {
-            await runBotScript(botId);
-        } catch (error) {
-            console.error("Error running script:", error);
-        } finally {
-            setIsRunning(false);
-        }
+        await onRunScript(botId);
     };
 
     return (
@@ -35,10 +26,10 @@ export const BotScript: React.FC<BotScriptProps> = ({
                 {botScript && (
                     <div className="mt-4">
                         <button
-                            onClick={handleRunScript}
+                            onClick={handleRunClick}
                             disabled={isRunning}
                             className={`px-4 py-2 rounded-md ${
-                                isRunning 
+                                isRunning
                                     ? 'bg-gray-400 cursor-not-allowed' 
                                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                             }`}

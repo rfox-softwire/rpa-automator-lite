@@ -2,9 +2,10 @@ import React from 'react';
 import { BotSelector } from './components/BotSelector/BotSelector';
 import { BotDetails } from './components/BotDetails/BotDetails';
 import { BotScript } from './components/BotScript/BotScript';
+import { ScriptOutput } from './components/ScriptOutput/ScriptOutput';
 
 import { useBots } from './hooks/useBots';
-import { Bot, generateBotScript } from './services/api';
+import { Bot, generateBotScript, runBotScript, getBotOutputs } from './services/api';
 
 function App() {
     const [selectedBot, setSelectedBot] = React.useState<Bot | null>(null);
@@ -13,6 +14,8 @@ function App() {
     const [successCriteria, setSuccessCriteria] = React.useState('');
     const [botName, setBotName] = React.useState('');
     const [botScript, setBotScript] = React.useState('');
+    const [scriptOutputs, setScriptOutputs] = React.useState<{ output: string; error: string } | null>(null);
+    const [isRunning, setIsRunning] = React.useState(false);
 
     const bots = useBots();
 
@@ -41,6 +44,56 @@ function App() {
         } catch (error) {
             console.error('Error generating script:', error);
             throw error;
+        }
+    };
+
+    const handleRunScript = async (botId: string) => {
+        if (!botId) return;
+        setIsRunning(true);
+        setScriptOutputs(null);
+        try {
+            console.log("Starting script execution...");
+            const runResponse = await runBotScript(botId);
+            console.log("Script execution started:", runResponse);
+        
+            const maxAttempts = 60;
+            let attempts = 0;
+            let outputs;
+        
+            while (attempts < maxAttempts) {
+                await new Promise(resolve => setTimeout(resolve, 500)); 
+                console.log(`Checking for script completion (attempt ${attempts + 1}/${maxAttempts})`);
+                
+                outputs = await getBotOutputs(botId);
+                
+                if (outputs.output || outputs.error) {
+                    console.log("Script completed with output:", outputs);
+                    setScriptOutputs({
+                        output: outputs.output || "No output",
+                        error: outputs.error || "No errors"
+                    });
+                    setIsRunning(false);
+                    return;
+                }
+                
+                attempts++;
+            }
+            
+            console.warn("Script execution timed out");
+            setScriptOutputs({
+                output: outputs?.output || "No output received",
+                error: "Script execution timed out (30s)"
+            });
+
+        } catch (error) {
+            console.error("Error in handleRunScript:", error);
+            setScriptOutputs({
+                output: "",
+                 error: error instanceof Error ? error.message : "Failed to run script"
+            });
+        } finally {
+            console.log("Script execution completed");
+            setIsRunning(false);
         }
     };
 
@@ -100,14 +153,27 @@ function App() {
                         botScript={botScript}
                         isNewBot={isNewBot}
                         botId={selectedBot?.id}
+                        onRunScript={handleRunScript}
+                        isRunning={isRunning}
                     />
                     
-                    <div className="flex-1 min-w-[300px] bg-white shadow overflow-hidden sm:rounded-lg p-6">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Preview</h2>
-                        <div className="bg-gray-50 p-4 rounded-md h-64 flex items-center justify-center text-gray-400">
-                            Preview panel
+                    <div className="flex-1 min-w-[300px] bg-white shadow overflow-hidden sm:rounded-lg p-6 flex flex-col">
+                        <h2 className="text-lg font-medium text-gray-900 mb-4">Script Output</h2>
+                        <div className="flex-1">
+                            {scriptOutputs && (
+                                <ScriptOutput 
+                                    output={scriptOutputs.output} 
+                                    error={scriptOutputs.error}
+                                    isRunning={isRunning}
+                                />
+                            )}
+                            {!scriptOutputs && (
+                                <div className="bg-gray-50 p-4 rounded-md h-full flex items-center justify-center text-gray-400">
+                                    Run the script to see output
+                                </div>
+                            )}
                         </div>
-                    </div>                    
+                    </div>                 
                 </div>            
             </main>
         </div>

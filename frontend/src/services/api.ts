@@ -83,3 +83,16 @@ export const runBotScript = async (botId: string): Promise<{
         throw error;
     }
 };
+
+export const getBotOutputs = async (botId: string): Promise<{
+    output: string;
+    error: string;
+}> => {
+    try {
+        const response = await api.get(`/bots/${botId}/outputs`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching bot outputs:", error);
+        throw error;
+    }
+};

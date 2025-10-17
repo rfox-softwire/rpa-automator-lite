@@ -93,6 +93,12 @@ async def generate_repair_script_task(bot_id, bot_data):
             "error": str(error)
         })
 
+def get_latest_iteration_path(bot_path):
+    iterations = [d for d in bot_path.iterdir() if d.is_dir() and d.name.startswith("iteration")]
+    if not iterations:
+        raise FileNotFoundError("No iteration directories found")
+    return max(iterations, key=lambda x: int(x.name.replace("iteration", "")))
+
 class BotRequest(BaseModel):
     name: str
     instruction: str
@@ -122,14 +128,8 @@ async def get_bot(bot_id):
         raise HTTPException(status_code=404, detail="Bot not found")
     return bots_db[bot_id]
 
-def get_latest_iteration_path(bot_path):
-    iterations = [d for d in bot_path.iterdir() if d.is_dir() and d.name.startswith("iteration")]
-    if not iterations:
-        raise FileNotFoundError("No iteration directories found")
-    return max(iterations, key=lambda x: int(x.name.replace("iteration", "")))
-
 @app.post("/api/bots/{bot_id}/run", response_model=dict)
-async def run_bot_script(bot_id: str):
+async def run_bot_script(bot_id):
     if bot_id not in bots_db:
         raise HTTPException(status_code=404, detail="Bot not found")
     
@@ -149,18 +149,11 @@ async def run_bot_script(bot_id: str):
 
         process = subprocess.Popen(
             ["python", str(script_path)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
             text=True
         )
         
-        stdout, stderr = process.communicate(timeout=5)
-        
         return {
             "status": "completed",
-            "exit_code": process.returncode,
-            "stdout": stdout,
-            "stderr": stderr
         }
         
     except subprocess.TimeoutExpired:
@@ -178,6 +171,26 @@ async def repair_bot(bot_id, background_tasks):
     bots_db[bot_id]["status"] = "pending"
     background_tasks.add_task(generate_repair_script_task, bot_id, bots_db[bot_id])
     return bots_db[bot_id]
+
+@app.get("/api/bots/{bot_id}/outputs")
+async def get_bot_outputs(bot_id: str):
+    if bot_id not in bots_db:
+        raise HTTPException(status_code=404, detail="Bot not found")
+    
+    bot = bots_db[bot_id]
+    bot_path = Path("data") / bot["name"]
+    
+    try:
+        latest_iteration = get_latest_iteration_path(bot_path)
+        output_path = latest_iteration / "output.txt"
+        error_path = latest_iteration / "errorMessage.txt"
+        
+        return {
+            "output": safe_read_text(output_path, "No output found"),
+            "error": safe_read_text(error_path, "No error message found")
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/bots", response_model=list[BotResponse])
 async def get_bots():
