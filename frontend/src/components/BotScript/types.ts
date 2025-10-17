@@ -4,4 +4,5 @@ export interface BotScriptProps {
     botId: string | undefined;
     onRunScript: (botId: string) => Promise<void>;
     isRunning: boolean;
+    isRepairing: boolean;
 }

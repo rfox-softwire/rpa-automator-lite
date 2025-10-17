@@ -47,7 +47,7 @@ export const generateBotScript = async (botName: string, instruction: string, su
         const botId = createResponse.data.id;
         let bot = createResponse.data;
 
-        while (bot.status === 'pending' || bot.status === 'processing') {
+        while (bot.status === 'pending') {
             await new Promise(resolve => setTimeout(resolve, 100));
             const response = await api.get(`/bots/${botId}`);
             bot = response.data;
@@ -95,4 +95,56 @@ export const getBotOutputs = async (botId: string): Promise<{
         console.error("Error fetching bot outputs:", error);
         throw error;
     }
+};
+
+export const repairBotScript = async (botId: string): Promise<Bot> => {
+    try {
+        console.log(`Attempting to repair bot ${botId}...`);
+        const response = await api.post(`/bots/${botId}/repair`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        console.log('Repair request initiated, response:', response.data);
+        
+        const bot = await pollBotStatus(botId);
+        if (bot?.status !== 'ready') {
+            throw new Error(bot?.error || "Repair failed");
+        }
+        
+        return bot;
+    } catch (error) {
+        console.error("Error repairing bot script:", error);
+        if (axios.isAxiosError(error)) {
+            console.error('Response data:', error.response?.data);
+            console.error('Status code:', error.response?.status);
+            console.error('Headers:', error.response?.headers);
+        }
+        throw error;
+    }
+};
+
+export const pollBotStatus = async (botId: string, maxAttempts: number = 1200, interval: number = 1000): Promise<Bot | null> => {
+    let attempts = 0;
+    let bot: Bot | null = null;
+    
+    while (attempts < maxAttempts) {
+        try {
+            const response = await api.get(`/bots/${botId}`);
+            bot = response.data;
+            
+            if (bot?.status !== 'pending') {
+                return bot;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, interval));
+            attempts++;
+        } catch (error) {
+            console.error(`Error polling bot status (attempt ${attempts + 1}):`, error);
+            throw error;
+        }
+    }
+    
+    return null;
 };

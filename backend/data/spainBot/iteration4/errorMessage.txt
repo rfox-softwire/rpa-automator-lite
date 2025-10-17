@@ -1,0 +1,24 @@
+[tracking] Locator.wait_for failed: Locator.wait_for: Error: strict mode violation: locator("//th[contains(text(),\"Population\") or contains(@class,\"infobox-header\")]") resolved to 3 elements:
+    1) <th colspan="2" class="infobox-header">…</th> aka get_by_role("cell", name="Formation")
+    2) <th colspan="2" class="infobox-header">…</th> aka get_by_role("cell", name="Area", exact=True)
+    3) <th colspan="2" class="infobox-header">…</th> aka get_by_role("cell", name="Population")
+
+Call log:
+  - waiting for locator("//th[contains(text(),\"Population\") or contains(@class,\"infobox-header\")]") to be visible
+
+Exception: Error: Locator.wait_for: Error: strict mode violation: locator("//th[contains(text(),\"Population\") or contains(@class,\"infobox-header\")]") resolved to 3 elements:
+    1) <th colspan="2" class="infobox-header">…</th> aka get_by_role("cell", name="Formation")
+    2) <th colspan="2" class="infobox-header">…</th> aka get_by_role("cell", name="Area", exact=True)
+    3) <th colspan="2" class="infobox-header">…</th> aka get_by_role("cell", name="Population")
+
+Call log:
+  - waiting for locator("//th[contains(text(),\"Population\") or contains(@class,\"infobox-header\")]") to be visible
+
+Traceback (last {MAX_TRACEBACK_LENGTH} frame(s)):
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_frame.py", line 369, in wait_for_selector
+    await self._channel.send(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+

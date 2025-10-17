@@ -7,7 +7,8 @@ export const BotScript: React.FC<BotScriptProps> = ({
     isNewBot,
     botId,
     onRunScript,
-    isRunning
+    isRunning,
+    isRepairing
 }) => {
     const handleRunClick = async () => {
         if (!botId) return;
@@ -20,21 +21,23 @@ export const BotScript: React.FC<BotScriptProps> = ({
             <div key={`script-${botScript?.substring(0, 20)}`} className="bg-gray-50 p-4 rounded-md font-mono text-sm h-full overflow-auto">
                 {!isNewBot && (
                     <pre className="whitespace-pre-wrap">
-                        {botScript}
+                        {isRepairing && 'Script is being repaired...'}
+                        {!isRepairing && botScript}
                     </pre>
                 )}
-                {botScript && (
+                {!isRepairing && botScript && (
                     <div className="mt-4">
                         <button
                             onClick={handleRunClick}
-                            disabled={isRunning}
+                            disabled={isRunning || isRepairing}
                             className={`px-4 py-2 rounded-md ${
-                                isRunning
+                                isRunning || isRepairing
                                     ? 'bg-gray-400 cursor-not-allowed' 
                                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                             }`}
                         >
-                            {isRunning ? 'Running...' : 'Run Script'}
+                            {isRunning && 'Running...'}
+                            {!isRunning && 'Run Script'}
                         </button>
                     </div>
                 )}

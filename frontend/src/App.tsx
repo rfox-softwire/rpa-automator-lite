@@ -5,7 +5,7 @@ import { BotScript } from './components/BotScript/BotScript';
 import { ScriptOutput } from './components/ScriptOutput/ScriptOutput';
 
 import { useBots } from './hooks/useBots';
-import { Bot, generateBotScript, runBotScript, getBotOutputs } from './services/api';
+import { Bot, generateBotScript, runBotScript, getBotOutputs, repairBotScript } from './services/api';
 
 function App() {
     const [selectedBot, setSelectedBot] = React.useState<Bot | null>(null);
@@ -16,6 +16,7 @@ function App() {
     const [botScript, setBotScript] = React.useState('');
     const [scriptOutputs, setScriptOutputs] = React.useState<{ output: string; error: string } | null>(null);
     const [isRunning, setIsRunning] = React.useState(false);
+    const [isRepairing, setIsRepairing] = React.useState(false);
 
     const bots = useBots();
 
@@ -97,6 +98,33 @@ function App() {
         }
     };
 
+    const handleRepairScript = async (botId: string) => {
+        if (!botId) return;
+        
+        setScriptOutputs(null);
+        setIsRepairing(true);
+        
+        try {
+            console.log("Starting script repair...");
+            const updatedBot = await repairBotScript(botId);
+            
+            setBotScript(updatedBot.scriptUnmodified);
+            setScriptOutputs({
+                output: "Script has been repaired. You can now run it again.",
+                error: ""
+            });
+            setSelectedBot(updatedBot);
+        } catch (error) {
+            console.error("Error repairing script:", error);
+            setScriptOutputs({
+                output: "",
+                error: error instanceof Error ? error.message : "Failed to repair script"
+            });
+        } finally {
+            setIsRepairing(false);
+        }
+    };
+
     return (
         <div className='min-h-screen bg-gray-50'>
             <header className='bg-white shadow'>
@@ -155,6 +183,7 @@ function App() {
                         botId={selectedBot?.id}
                         onRunScript={handleRunScript}
                         isRunning={isRunning}
+                        isRepairing={isRepairing}
                     />
                     
                     <div className="flex-1 min-w-[300px] bg-white shadow overflow-hidden sm:rounded-lg p-6 flex flex-col">
@@ -165,6 +194,8 @@ function App() {
                                     output={scriptOutputs.output} 
                                     error={scriptOutputs.error}
                                     isRunning={isRunning}
+                                    onRepair={handleRepairScript}
+                                    botId={selectedBot?.id}
                                 />
                             )}
                             {!scriptOutputs && (

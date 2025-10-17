@@ -60,7 +60,7 @@ bots_db = load_bots()
 
 async def generate_initial_script_task(bot_id, bot_data):
     try:
-        bots_db[bot_id]["status"] = "processing"
+        bots_db[bot_id]["status"] = "pending"
 
         iteration_filepath = initiate_bot_script(bot_data["name"], bot_data["instruction"], bot_data["success_criteria"])
 
@@ -78,7 +78,7 @@ async def generate_initial_script_task(bot_id, bot_data):
 
 async def generate_repair_script_task(bot_id, bot_data):
     try:
-        bots_db[bot_id]["status"] = "processing"
+        bots_db[bot_id]["status"] = "pending"
         new_iteration_filepath = repair_bot_script(bot_data["name"])
         
         bots_db[bot_id].update({
@@ -165,7 +165,7 @@ async def run_bot_script(bot_id):
         raise HTTPException(status_code=500, detail=f"Error running script: {str(e)}")
 
 @app.post("/api/bots/{bot_id}/repair", response_model=BotResponse)
-async def repair_bot(bot_id, background_tasks):
+async def repair_bot(bot_id, background_tasks: BackgroundTasks):
     if bot_id not in bots_db:
         raise HTTPException(status_code=404, detail="Bot not found")
     bots_db[bot_id]["status"] = "pending"

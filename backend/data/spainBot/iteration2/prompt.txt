@@ -1,0 +1,184 @@
+You are a RPA assistant that generates a Python script based on a user's instruction for interactions with web applications using the Playwright package.
+The user's original instruction was: Using www.wikipedia.org, find the population of Spain
+The user's success criteria was: The script should print "The population of Spain is x" where x is a reasonable number for the population of Spain
+Here's the original script that had the error:
+```python
+import asyncio
+from playwright.async_api import async_playwright
+
+async def main():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
+
+        # Go to the Wikipedia page for Spain
+        await page.goto("https://en.wikipedia.org/wiki/Spain")
+
+        # Locate the population value in the infobox (first td after the "Population" header)
+        population_text = await page.locator(
+            'xpath=//th[contains(text(),"Population")]/following-sibling::td[1]'
+        ).inner_text()
+
+        # Extract the numeric part of the population string
+        import re
+        match = re.search(r'[\d,]+', population_text)
+        if match:
+            population_number = int(match.group(0).replace(',', ''))
+            print(f"The population of Spain is {population_number}")
+        else:
+            print("Could not find the population value.")
+
+        await browser.close()
+
+asyncio.run(main())
+```
+
+The user is trying to fix an error in their script. Here's the error that occurred:
+ [tracking] Locator.inner_text failed: Locator.inner_text: Timeout 5000ms exceeded.
+Call log:
+  - waiting for locator("//th[contains(text(),\"Population\")]/following-sibling::td[1]")
+
+Exception: TimeoutError: Locator.inner_text: Timeout 5000ms exceeded.
+Call log:
+  - waiting for locator("//th[contains(text(),\"Population\")]/following-sibling::td[1]")
+
+Traceback (last {MAX_TRACEBACK_LENGTH} frame(s)):
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_frame.py", line 695, in inner_text
+    return await self._channel.send(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+
+
+The script does not currently output anything
+Prior to failing its execution, https://en.wikipedia.org/wiki/Spain had the following summarised HTML content:
+<!-- form -->
+<form action="/w/index.php" class="cdx-search-input cdx-search-input--has-end-button" id="searchform">
+<div class="cdx-search-input__input-wrapper" data-search-loc="header-moved" id="simpleSearch">
+<div class="cdx-text-input cdx-text-input--has-start-icon">
+<input accesskey="f" aria-label="Search Wikipedia" autocapitalize="sentences" autocomplete="off" class="cdx-text-input__input mw-searchInput" id="searchInput" name="search" placeholder="Search Wikipedia" spellcheck="false" title="Search Wikipedia [alt-f]" type="search"/>
+<span class="cdx-text-input__icon cdx-text-input__start-icon"></span>
+</div>
+<input name="title" type="hidden" value="Special:Search"/>
+</div>
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+</form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-0" id="skin-client-pref-vector-feature-custom-font-size-value-0" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="0"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-0"><span class="cdx-label__label__text">Small</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-1" id="skin-client-pref-vector-feature-custom-font-size-value-1" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="1"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-1"><span class="cdx-label__label__text">Standard</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-custom-font-size-value-2" id="skin-client-pref-vector-feature-custom-font-size-value-2" name="skin-client-pref-vector-feature-custom-font-size-group" type="radio" value="2"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-custom-font-size-value-2"><span class="cdx-label__label__text">Large</span></label></div></form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-limited-width-value-1" id="skin-client-pref-vector-feature-limited-width-value-1" name="skin-client-pref-vector-feature-limited-width-group" type="radio" value="1"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-limited-width-value-1"><span class="cdx-label__label__text">Standard</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-vector-feature-limited-width-value-0" id="skin-client-pref-vector-feature-limited-width-value-0" name="skin-client-pref-vector-feature-limited-width-group" type="radio" value="0"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-vector-feature-limited-width-value-0"><span class="cdx-label__label__text">Wide</span></label></div></form>
+
+<!-- form -->
+<form><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-os" id="skin-client-pref-skin-theme-value-os" name="skin-client-pref-skin-theme-group" type="radio" value="os"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-os"><span class="cdx-label__label__text">Automatic</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-day" id="skin-client-pref-skin-theme-value-day" name="skin-client-pref-skin-theme-group" type="radio" value="day"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-day"><span class="cdx-label__label__text">Light</span></label></div><div class="cdx-radio"><input class="cdx-radio__input" data-event-name="skin-client-pref-skin-theme-value-night" id="skin-client-pref-skin-theme-value-night" name="skin-client-pref-skin-theme-group" type="radio" value="night"/><span class="cdx-radio__icon"></span><label class="cdx-label cdx-radio__label" for="skin-client-pref-skin-theme-value-night"><span class="cdx-label__label__text">Dark</span></label></div></form>
+
+<!-- form -->
+<form action="/w/index.php" class="cdx-search-input cdx-search-input--has-end-button" id="vector-sticky-search-form">
+<div class="cdx-search-input__input-wrapper" data-search-loc="header-moved">
+<div class="cdx-text-input cdx-text-input--has-start-icon">
+<input autocomplete="off" class="cdx-text-input__input mw-searchInput" name="search" placeholder="Search Wikipedia" type="search"/>
+<span class="cdx-text-input__icon cdx-text-input__start-icon"></span>
+</div>
+<input name="title" type="hidden" value="Special:Search"/>
+</div>
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+</form>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-main-menu.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-main-menu.unpin">hide</button>
+
+<!-- button -->
+<button class="cdx-button cdx-search-input__end-button">Search</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-toc.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-toc.unpin">hide</button>
+
+<!-- button -->
+<button aria-controls="toc-History-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle History subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Geography-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Geography subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Politics-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Politics subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Economy-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Economy subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Demographics-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Demographics subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-Culture-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle Culture subsection</span>
+</button>
+
+<!-- button -->
+<button aria-controls="toc-References-sublist" aria-expanded="false" class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-toc-toggle">
+<span class="vector-icon mw-ui-icon-wikimedia-expand"></span>
+<span>Toggle References subsection</span>
+</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-page-tools.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-page-tools.unpin">hide</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-pin-button" data-event-name="pinnable-header.vector-appearance.pin">move to sidebar</button>
+
+<!-- button -->
+<button class="vector-pinnable-header-toggle-button vector-pinnable-header-unpin-button" data-event-name="pinnable-header.vector-appearance.unpin">hide</button>
+
+<!-- button -->
+<button aria-expanded="false" class="mw-collapsible-toggle mw-collapsible-toggle-default mw-collapsible-toggle-collapsed" tabindex="0" type="button"><span class="mw-collapsible-text">show</span></button>
+
+<!-- button -->
+<button aria-expanded="false" class="mw-collapsible-toggle mw-collapsible-toggle-default mw-collapsible-toggle-collapsed" style="color: inherit;" tabindex="0" type="button"><span class="mw-collapsible-text" style="color: inherit;">show</span></button>
+
+<!-- button -->
+<button class="cdx-button cdx-button--weight-quiet cdx-button--icon-only vector-sticky-header-search-toggle" data-event-name="ui.vector-sticky-search-form.icon" tabindex="-1"><span class="vector-icon mw-ui-icon-search mw-ui-icon-wikimedia-search"></span>
+<span>Search</span>
+</button>
+
+<!-- button -->
+<button class="cdx-button cdx-button--weight-quiet mw-interlanguage-selector" data-event-name="ui.dropdown-p-lang-btn-sticky-header" id="p-lang-btn-sticky-header" tabindex="-1"><span class="vector-icon mw-ui-icon-wikimedia-language mw-ui-icon-wikimedia-wikimedia-language"></span>
+<span>304 languages</span>
+</button>
+
+<!-- table -->
+<table class="infobox ib-country vcard"><tbody><tr><th class="infobox-above adr" colspan="2">Kingdom of Spain<i lang="es">Reino de España</i>(<a href="/wiki/Spanish_language" title="Spanish language">Spanish</a>)<br/><button aria-expanded="false" class="mw-collapsible-toggle mw-collapsible-toggle-default mw-collapsible-toggle-collapsed" tabindex="0" type="button">show</button>7 other names<sup class="reference" id="cite_ref-es_lang_1-0"><a href="#cite_note-es_lang-1">[a]</a></sup><ul class="mw-collapsible-content" hidden="until-found" style="margin-top: 0; margin-bottom: 0; line-height: inherit; list-style: none; margin-left: 0;"><li style="line-height: inherit; margin: 0"><link href="mw-data:TemplateStyles:r1316064257" rel="mw-deduplicated-inline-style"/><table class="infobox-subbox" style="font-size:80%;font-weight:normal;"><tbody><tr class="mergedrow"><th class="infobox-label" scope="row"><a href="/wiki/Aragonese_language" title="Aragonese language">Aragonese</a>:</th><td class="infobox-data"><i lang="an">Reino d'Espanya</i></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row"><a href="/wiki/Asturian_language" title="Asturian language">Asturian</a>:</th><td class="infobox-data"><i lang="ast">Reinu d'España</i></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row"><a href="/wiki/Catalan_language" title="Catalan language">Catalan</a>:</th><td class="infobox-data"><i lang="ca">Regne d'Espanya</i></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row"><a href="/wiki/Basque_language" title="Basque language">Basque</a>:</th><td class="infobox-data"><i lang="eu">Espainiako Erresuma</i></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row"><a href="/wiki/Galician_language" title="Galician language">Galician</a>:</th><td class="infobox-data"><i lang="gl">Reino de España</i></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row"><a href="/wiki/Occitan_language" title="Occitan language">Occitan</a>:</th><td class="infobox-data"><i lang="oc">Reiaume d'Espanha</i></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row"><a href="/wiki/Valencian_language" title="Valencian language">Valencian</a>:</th><td class="infobox-data"><i lang="ca-valencia">Regne d'Espanya</i></td></tr></tbody></table></li></ul></th></tr><tr><td class="infobox-image" colspan="2"><a class="mw-file-description" href="/wiki/File:Flag_of_Spain.svg" title="Flag of Spain"></a><a href="/wiki/Flag_of_Spain" title="Flag of Spain">Flag</a><a class="mw-file-description" href="/wiki/File:Escudo_de_Espa%C3%B1a_(variant).svg" title="Coat of arms of Spain"></a><a href="/wiki/Coat_of_arms_of_Spain" title="Coat of arms of Spain">Coat of arms</a></td></tr><tr><td class="infobox-full-data" colspan="2"><b>Motto:</b><i lang="la"><a href="/wiki/Plus_ultra" title="Plus ultra">Plus ultra</a></i>(<a href="/wiki/Latin" title="Latin">Latin</a>)<br/>(English: 'Further Beyond')</td></tr><tr><td class="infobox-full-data anthem" colspan="2"><b>Anthem:</b><i lang="es"><a href="/wiki/Marcha_Real" title="Marcha Real">Marcha Real</a></i>(<a href="/wiki/Spanish_language" title="Spanish language">Spanish</a>)<sup class="reference" id="cite_ref-2"><a href="#cite_note-2">[1]</a></sup><br/>(English: 'Royal March')<br/><audio class="" data-durationhint="54" data-mw-tmh="" data-mwprovider="wikimediacommons" data-mwtitle="Himno_Nacional_de_España.ogg" disabled="disabled" id="mwe_player_0_placeholder" playsinline="" preload="none" style="width:250px;" tabindex="-1" width="250"></audio><a class="mw-tmh-play" href="/wiki/File:Himno_Nacional_de_Espa%C3%B1a.ogg" role="button" title="Play audio"></a>Duration: 54 seconds.0:54</td></tr><tr><td class="infobox-full-data" colspan="2"><a class="mw-file-description" href="/wiki/File:EU-Spain_(orthographic_projection)_(with_de_jure_territory).svg"></a><a class="mw-file-description" href="/wiki/File:EU-Spain.svg"></a><label style="display:inline-block"><input name="switcher-0" type="radio"/>Show globe</label><label style="display:block"><input name="switcher-0" type="radio"/>Show map of Europe</label><label style="display:block"><input name="switcher-0" type="radio"/>Show all</label>Location of Spain<link href="mw-data:TemplateStyles:r981673959" rel="mw-deduplicated-inline-style"/>Spain within the<a href="/wiki/European_Union" title="European Union">European Union</a><link href="mw-data:TemplateStyles:r981673959" rel="mw-deduplicated-inline-style"/><i>De jure</i><a href="/wiki/United_Nations_list_of_non-self-governing_territories" title="United Nations list of non-self-governing territories">non-self-governing territory</a><sup class="reference" id="cite_ref-8"><a href="#cite_note-8">[b]</a></sup></td></tr><tr><th class="infobox-label" scope="row">Capitaland largest city</th><td class="infobox-data"><a href="/wiki/Madrid" title="Madrid">Madrid</a><br/><a class="external text" href="https://geohack.toolforge.org/geohack.php?pagename=Spain&amp;params=40_26_N_3_42_W_type:city" style="white-space: normal;">40°26′N3°42′W﻿ / ﻿40.433°N 3.700°W﻿ /40.433; -3.700</a></td></tr><tr><th class="infobox-label" scope="row">Official language</th><td class="infobox-data"><a href="/wiki/Spanish_language" title="Spanish language">Spanish</a><sup class="reference" id="cite_ref-b_10-0"><a href="#cite_note-b-10">[c]</a></sup><sup class="reference" id="cite_ref-Co-official_languages_11-0"><a href="#cite_note-Co-official_languages-11">[d]</a></sup><link href="mw-data:TemplateStyles:r1316064257" rel="mw-deduplicated-inline-style"/></td></tr><tr><th class="infobox-label" scope="row">Nationality(2025)<sup class="reference" id="cite_ref-auto_12-0"><a href="#cite_note-auto-12">[8]</a></sup></th><td class="infobox-data"><ul><li>85.7%<a href="/wiki/Spanish_nationality_law" title="Spanish nationality law">Spanish</a></li><li>14.3%<a href="/wiki/Immigration_to_Spain" title="Immigration to Spain">foreigners</a></li></ul></td></tr><tr style="display:none"><td colspan="2"></td></tr><tr><th class="infobox-label" scope="row">Religion(2025)<sup class="reference" id="cite_ref-13"><a href="#cite_note-13">[9]</a></sup></th><td class="infobox-data"><link href="mw-data:TemplateStyles:r1126788409" rel="mw-deduplicated-inline-style"/><ul><li>58.6%<a class="mw-redirect" href="/wiki/Roman_Catholicism" title="Roman Catholicism">Roman Catholicism</a><ul><li><ul><li>40%<a href="/wiki/Lapsed_Catholic" title="Lapsed Catholic">non-practicing Catholic</a></li><li>18.6% practicing<a class="mw-redirect" href="/wiki/Catholic_church" title="Catholic church">Catholic</a></li></ul></li></ul></li><li>13.3%<a href="/wiki/Irreligion_in_Spain" title="Irreligion in Spain">atheist</a></li><li>11.7%<a href="/wiki/Irreligion_in_Spain" title="Irreligion in Spain">indifferent or no religion</a></li><li>11.1%<a href="/wiki/Agnosticism" title="Agnosticism">agnostic</a></li><li>3.6%<a href="/wiki/Religion_in_Spain" title="Religion in Spain">other religion</a></li><li>1.7% unanswered</li></ul></td></tr><tr><th class="infobox-label" scope="row"><a href="/wiki/Demonym" title="Demonym">Demonyms</a></th><td class="infobox-data"><ul><li><a class="mw-redirect" href="/wiki/Spaniard" title="Spaniard">Spaniard</a></li><li>Spanish</li></ul></td></tr><tr><th class="infobox-label" scope="row"><a href="/wiki/Politics_of_Spain" title="Politics of Spain">Government</a></th><td class="infobox-data">Unitary<a class="mw-redirect" href="/wiki/Parliamentary_constitutional_monarchy" title="Parliamentary constitutional monarchy">parliamentary constitutional monarchy</a></td></tr><tr class="mergedrow"><td class="infobox-full-data" colspan="2"><link href="mw-data:TemplateStyles:r1316064257" rel="mw-deduplicated-inline-style"/></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">•<a href="/wiki/Monarchy_of_Spain" title="Monarchy of Spain">Monarch</a></th><td class="infobox-data"><a href="/wiki/Felipe_VI" title="Felipe VI">Felipe VI</a></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">•<a href="/wiki/Prime_Minister_of_Spain" title="Prime Minister of Spain">Prime Minister</a></th><td class="infobox-data"><a href="/wiki/Pedro_S%C3%A1nchez" title="Pedro Sánchez">Pedro Sánchez</a></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">•<a href="/wiki/President_of_the_Congress_of_Deputies" title="President of the Congress of Deputies">President of the Congress of Deputies</a></th><td class="infobox-data"><a href="/wiki/Francina_Armengol" title="Francina Armengol">Francina Armengol</a></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">•<a href="/wiki/President_of_the_Senate_of_Spain" title="President of the Senate of Spain">President of the Senate</a></th><td class="infobox-data"><a href="/wiki/Pedro_Roll%C3%A1n" title="Pedro Rollán">Pedro Rollán</a></td></tr><tr style="display:none"><td colspan="2"></td></tr><tr><th class="infobox-label" scope="row">Legislature</th><td class="infobox-data"><a href="/wiki/Cortes_Generales" title="Cortes Generales">Cortes Generales</a></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">•<a href="/wiki/Upper_house" title="Upper house">Upper house</a></th><td class="infobox-data"><a href="/wiki/Senate_of_Spain" title="Senate of Spain">Senate</a></td></tr><tr class="mergedbottomrow"><th class="infobox-label" scope="row">•<a href="/wiki/Lower_house" title="Lower house">Lower house</a></th><td class="infobox-data"><a href="/wiki/Congress_of_Deputies" title="Congress of Deputies">Congress of Deputies</a></td></tr><tr class="mergedtoprow"><th class="infobox-header" colspan="2"><a href="/wiki/History_of_Spain" title="History of Spain">Formation</a></th></tr><tr class="mergedrow"><td class="infobox-full-data" colspan="2"><link href="mw-data:TemplateStyles:r1316064257" rel="mw-deduplicated-inline-style"/></td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">•<a href="/wiki/Catholic_Monarchs_of_Spain" title="Catholic Monarchs of Spain">Dynastic union</a></th><td class="infobox-data">20 January 1479</td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">•<a href="/wiki/Habsburg_Spain" title="Habsburg Spain">Sole sovereign</a></th><td class="infobox-data">14 March 1516</td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">•<a href="/wiki/Nueva_Planta_decrees" title="Nueva Planta decrees">Centralised state</a></th><td class="infobox-data">9 June 1715</td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">•<a href="/wiki/Spanish_Constitution_of_1812" title="Spanish Constitution of 1812">First constitution</a></th><td class="infobox-data">19 March 1812</td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">•<a href="/wiki/Constitution_of_Spain" title="Constitution of Spain">Current constitution</a></th><td class="infobox-data">29 December 1978</td></tr><tr style="display:none"><td colspan="2"></td></tr><tr class="mergedtoprow"><th class="infobox-header" colspan="2"><a href="/wiki/Geography_of_Spain" title="Geography of Spain">Area</a></th></tr><tr class="mergedrow"><th class="infobox-label" scope="row">• Total</th><td class="infobox-data">506,030<sup class="reference" id="cite_ref-14"><a href="#cite_note-14">[10]</a></sup>km<sup>2</sup>(195,380 sq mi) (<a href="/wiki/List_of_countries_and_dependencies_by_area" title="List of countries and dependencies by area">50th</a>)</td></tr><tr class="mergedbottomrow"><th class="infobox-label" scope="row">• Water (%)</th><td class="infobox-data">0.89<sup class="reference" id="cite_ref-15"><a href="#cite_note-15">[11]</a></sup></td></tr><tr class="mergedtoprow"><th class="infobox-header" colspan="2"><a href="/wiki/Demographics_of_Spain" title="Demographics of Spain">Population</a></th></tr><tr class="mergedrow"><th class="infobox-label" scope="row">• 2025 estimate</th><td class="infobox-data">49,315,949<sup class="reference" id="cite_ref-auto_12-1"><a href="#cite_note-auto-12">[8]</a></sup>(<a href="/wiki/List_of_countries_and_dependencies_by_population" title="List of countries and dependencies by population">31st</a>)</td></tr><tr class="mergedbottomrow"><th class="infobox-label" scope="row">• Density</th><td class="infobox-data">97/km<sup>2</sup>(251.2/sq mi) (<a href="/wiki/List_of_countries_and_dependencies_by_population_density" title="List of countries and dependencies by population density">119th</a>)</td></tr><tr class="mergedtoprow"><th class="infobox-label" scope="row"><a href="/wiki/Gross_domestic_product" title="Gross domestic product">GDP</a><link href="mw-data:TemplateStyles:r886047488" rel="mw-deduplicated-inline-style"/>(<a href="/wiki/Purchasing_power_parity" title="Purchasing power parity">PPP</a>)</th><td class="infobox-data">2025 estimate</td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">• Total</th><td class="infobox-data">$2.829 trillion<sup class="reference" id="cite_ref-IMFWEO.ES_16-0"><a href="#cite_note-IMFWEO.ES-16">[12]</a></sup>(<a href="/wiki/List_of_countries_by_GDP_(PPP)" title="List of countries by GDP (PPP)">15th</a>)</td></tr><tr class="mergedbottomrow"><th class="infobox-label" scope="row">• Per capita</th><td class="infobox-data">$56,888<sup class="reference" id="cite_ref-IMFWEO.ES_16-1"><a href="#cite_note-IMFWEO.ES-16">[12]</a></sup>(<a href="/wiki/List_of_countries_by_GDP_(PPP)_per_capita" title="List of countries by GDP (PPP) per capita">35th</a>)</td></tr><tr class="mergedtoprow"><th class="infobox-label" scope="row"><a href="/wiki/Gross_domestic_product" title="Gross domestic product">GDP</a><link href="mw-data:TemplateStyles:r886047488" rel="mw-deduplicated-inline-style"/>(nominal)</th><td class="infobox-data">2025 estimate</td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">• Total</th><td class="infobox-data">$1.891 trillion<sup class="reference" id="cite_ref-IMFWEO.ES_16-2"><a href="#cite_note-IMFWEO.ES-16">[12]</a></sup>(<a href="/wiki/List_of_countries_by_GDP_(nominal)" title="List of countries by GDP (nominal)">12th</a>)</td></tr><tr class="mergedbottomrow"><th class="infobox-label" scope="row">• Per capita</th><td class="infobox-data">$38,040<sup class="reference" id="cite_ref-IMFWEO.ES_16-3"><a href="#cite_note-IMFWEO.ES-16">[12]</a></sup>(<a href="/wiki/List_of_countries_by_GDP_(nominal)_per_capita" title="List of countries by GDP (nominal) per capita">30th</a>)</td></tr><tr><th class="infobox-label" scope="row"><a href="/wiki/Gini_coefficient" title="Gini coefficient">Gini</a><link href="mw-data:TemplateStyles:r886047488" rel="mw-deduplicated-inline-style"/>(2024)</th><td class="infobox-data">31.2<sup class="reference" id="cite_ref-eurogini_17-0"><a href="#cite_note-eurogini-17">[13]</a></sup><br/>medium inequality</td></tr><tr><th class="infobox-label" scope="row"><a href="/wiki/Human_Development_Index" title="Human Development Index">HDI</a><link href="mw-data:TemplateStyles:r886047488" rel="mw-deduplicated-inline-style"/>(2023)</th><td class="infobox-data">0.918<sup class="reference" id="cite_ref-UNHDR_18-0"><a href="#cite_note-UNHDR-18">[14]</a></sup><br/><link href="mw-data:TemplateStyles:r1239334494" rel="mw-deduplicated-inline-style"/>very high(<a href="/wiki/List_of_countries_by_Human_Development_Index" title="List of countries by Human Development Index">28th</a>)</td></tr><tr><th class="infobox-label" scope="row">Currency</th><td class="infobox-data"><a href="/wiki/Euro" title="Euro">Euro</a><sup class="reference" id="cite_ref-19"><a href="#cite_note-19">[e]</a></sup>(<a href="/wiki/Euro_sign" title="Euro sign">€</a>) (<a href="/wiki/ISO_4217" title="ISO 4217">EUR</a>)</td></tr><tr class="mergedtoprow"><th class="infobox-label" scope="row">Time zone</th><td class="infobox-data"><a href="/wiki/Coordinated_Universal_Time" title="Coordinated Universal Time">UTC</a>⁠±0 to +1(<a href="/wiki/Western_European_Time" title="Western European Time">WET</a>and<a href="/wiki/Central_European_Time" title="Central European Time">CET</a>)</td></tr><tr class="mergedrow"><th class="infobox-label" scope="row">• Summer (<a href="/wiki/Daylight_saving_time" title="Daylight saving time">DST</a>)</th><td class="infobox-data"><a href="/wiki/Coordinated_Universal_Time" title="Coordinated Universal Time">UTC</a>+1 to +2(<a href="/wiki/Western_European_Summer_Time" title="Western European Summer Time">WEST</a>and<a href="/wiki/Central_European_Summer_Time" title="Central European Summer Time">CEST</a>)</td></tr><tr class="mergedbottomrow"><th class="infobox-label" scope="row"></th><td class="infobox-data">Note: most of Spain observes CET/CEST, except the<a href="/wiki/Canary_Islands" title="Canary Islands">Canary Islands</a>which observe WET/WEST.</td></tr><tr><th class="infobox-label" scope="row">Date format</th><td class="infobox-data"><a class="mw-redirect" href="/wiki/Date_format" title="Date format">DD/MM/YYYY</a></td></tr><tr><th class="infobox-label" scope="row"><a href="/wiki/Telephone_numbers_in_Spain" title="Telephone numbers in Spain">Calling code</a></th><td class="infobox-data"><a class="mw-redirect" href="/wiki/%2B34" title="+34">+34</a></td></tr><tr><th class="infobox-label" scope="row"><a href="/wiki/ISO_3166" title="ISO 3166">ISO 3166 code</a></th><td class="infobox-data"><a href="/wiki/ISO_3166-2:ES" title="ISO 3166-2:ES">ES</a></td></tr><tr><th class="infobox-label" scope="row"><a href="/wiki/Country_code_top-level_domain" title="Country code top-level domain">Internet TLD</a></th><td class="infobox-data"><a href="/wiki/.es" title=".es">.es</a><sup class="reference" id="cite_ref-e_20-0"><a href="#cite_note-e-20">[f]</a></sup></td></tr></tbody></table>
+IMPORTANT: The script should follow these rules:
+1. Use asynchronous Playwright
+2. Do not use try/catch blocks
+3. The script should be self-contained with all necessary imports
+4. The script should be executable directly (remember that 'async with' outside async function is not allowed)
+5. Do not include any if __name__ == "__main__": blocks
+
+Please generate a corrected version of the script that fixes the error while maintaining the original functionality.
+Only return the proposed Python script.

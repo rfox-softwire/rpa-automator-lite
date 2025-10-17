@@ -1,7 +1,7 @@
 import React from "react";
 import { ScriptOutputProps } from "./types";
 
-export const ScriptOutput: React.FC<ScriptOutputProps> = ({ output, error, isRunning }) => {
+export const ScriptOutput: React.FC<ScriptOutputProps> = ({ output, error, botId, isRunning, onRepair }) => {
     if (isRunning) {
         return (
             <div className="mt-4 space-y-4">
@@ -11,6 +11,11 @@ export const ScriptOutput: React.FC<ScriptOutputProps> = ({ output, error, isRun
             </div>
         );
     }
+
+    const handleRepairClick = async () => {
+        if (!botId) return;
+        await onRepair(botId);
+    };
 
     return (
         <div className="mt-4 space-y-4">
@@ -23,11 +28,21 @@ export const ScriptOutput: React.FC<ScriptOutputProps> = ({ output, error, isRun
                 </div>
             )}
             {error && (
-                <div>
+                <div className="space-y-2">
                     <h3 className="font-medium text-red-700 mb-2">Error:</h3>
                     <pre className="bg-red-50 text-red-700 p-3 rounded-md overflow-auto max-h-40">
                         {error}
                     </pre>
+                    {!isRunning && (
+                        <div>
+                            <button
+                                onClick={handleRepairClick}
+                                className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-md transition-colors"
+                            >
+                                Repair Script
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
