@@ -33,7 +33,7 @@ export const fetchBots = async (): Promise<Bot[]> => {
 
 export const generateBotScript = async (botName: string, instruction: string, successCriteria: string): Promise<Bot> => {
     try {
-        const response = await api.post('/bots', {
+        const createResponse = await api.post('/bots', {
             name: botName.trim(),
             instruction: instruction.trim(),
             success_criteria: successCriteria.trim()
@@ -43,7 +43,21 @@ export const generateBotScript = async (botName: string, instruction: string, su
                 'Accept': 'application/json'
             }
         });
-        return response.data;
+
+        const botId = createResponse.data.id;
+        let bot = createResponse.data;
+
+        while (bot.status === 'pending' || bot.status === 'processing') {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const response = await api.get(`/bots/${botId}`);
+            bot = response.data;
+        }
+
+         if (bot.status === 'error') {
+            throw new Error(bot.error || 'Error generating script');
+        }
+
+        return bot;
     } catch (error) {
         console.error("Error creating bot and generating script:", error);
         if (axios.isAxiosError(error)) {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BotSelector } from './components/BotSelector/BotSelector';
 import { BotDetails } from './components/BotDetails/BotDetails';
+import { BotScript } from './components/BotScript/BotScript';
 
 import { useBots } from './hooks/useBots';
 import { Bot, generateBotScript } from './services/api';
@@ -21,9 +22,9 @@ function App() {
         setIsNewBot(false);
         if (bot) {
             setBotName(bot.name);
-            setInstruction(bot.instruction || '');
-            setSuccessCriteria(bot.success_criteria || '');
-            setBotScript(bot.scriptUnmodified || '');
+            setInstruction(bot.instruction);
+            setSuccessCriteria(bot.success_criteria);
+            setBotScript(bot.scriptUnmodified);
         }
     };
 
@@ -31,7 +32,10 @@ function App() {
         try {
             const newBot = await generateBotScript(name, instruction, successCriteria);
             setSelectedBot(newBot);
-            setBotScript(newBot.scriptUnmodified || '');
+            setBotName(newBot.name);
+            setInstruction(newBot.instruction);
+            setSuccessCriteria(newBot.success_criteria);
+            setBotScript(newBot.scriptUnmodified);
             setIsNewBot(false);
             return newBot;
         } catch (error) {
@@ -92,19 +96,11 @@ function App() {
                         onGenerateScript={handleGenerateScript}
                     />
 
-                    <div className="flex-1 min-w-[300px] bg-white shadow overflow-hidden sm:rounded-lg p-6">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Generated Script</h2>
-                        <div className="bg-gray-50 p-4 rounded-md font-mono text-sm h-full overflow-auto">
-                            {!isNewBot && (
-                            <pre className="whitespace-pre-wrap">
-                                {botScript || 'Click "Generate Script" to create a new script'}
-                            </pre>
-                            )}
-                            {isNewBot && (
-                            <p className="text-gray-500">Click "Generate Script" to create a new script</p>
-                            )}
-                        </div>
-                    </div>
+                    <BotScript 
+                        botScript={botScript}
+                        onBotScriptChange={setBotScript}
+                        isNewBot={isNewBot}
+                    />
                     
                     <div className="flex-1 min-w-[300px] bg-white shadow overflow-hidden sm:rounded-lg p-6">
                         <h2 className="text-lg font-medium text-gray-900 mb-4">Preview</h2>
