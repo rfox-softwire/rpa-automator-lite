@@ -98,8 +98,8 @@ function App() {
 
                     <BotScript 
                         botScript={botScript}
-                        onBotScriptChange={setBotScript}
                         isNewBot={isNewBot}
+                        botId={selectedBot?.id}
                     />
                     
                     <div className="flex-1 min-w-[300px] bg-white shadow overflow-hidden sm:rounded-lg p-6">

@@ -67,3 +67,19 @@ export const generateBotScript = async (botName: string, instruction: string, su
         throw error;
     }
 }
+
+export const runBotScript = async (botId: string): Promise<{
+    status: string;
+    exit_code?: number;
+    stdout?: string;
+    stderr?: string;
+    message?: string;
+}> => {
+    try {
+        const response = await api.post(`/bots/${botId}/run`);
+        return response.data;
+    } catch (error) {
+        console.error("Error running bot script:", error);
+        throw error;
+    }
+};

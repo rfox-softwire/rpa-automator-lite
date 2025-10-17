@@ -2,8 +2,7 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
-import uvicorn, asyncio, logging, sys, os
-import json
+import uvicorn, asyncio, logging, sys, os, json, subprocess
 
 from script_initiate import initiate_bot_script
 from script_repair import repair_bot_script
@@ -122,6 +121,55 @@ async def get_bot(bot_id):
     if bot_id not in bots_db:
         raise HTTPException(status_code=404, detail="Bot not found")
     return bots_db[bot_id]
+
+def get_latest_iteration_path(bot_path):
+    iterations = [d for d in bot_path.iterdir() if d.is_dir() and d.name.startswith("iteration")]
+    if not iterations:
+        raise FileNotFoundError("No iteration directories found")
+    return max(iterations, key=lambda x: int(x.name.replace("iteration", "")))
+
+@app.post("/api/bots/{bot_id}/run", response_model=dict)
+async def run_bot_script(bot_id: str):
+    if bot_id not in bots_db:
+        raise HTTPException(status_code=404, detail="Bot not found")
+    
+    bot = bots_db[bot_id]
+    
+    bot_path = Path("data") / bot["name"]
+    
+    if not bot_path.exists():
+        raise HTTPException(status_code=404, detail="Bot not found")
+    
+    try:
+        latest_iteration = get_latest_iteration_path(bot_path)
+        script_path = latest_iteration / "script.py"
+
+        if not script_path.exists():
+            raise FileNotFoundError(f"Script not found at {script_path}")
+
+        process = subprocess.Popen(
+            ["python", str(script_path)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        stdout, stderr = process.communicate(timeout=5)
+        
+        return {
+            "status": "completed",
+            "exit_code": process.returncode,
+            "stdout": stdout,
+            "stderr": stderr
+        }
+        
+    except subprocess.TimeoutExpired:
+        return {
+            "status": "running",
+            "message": "Script execution is still running"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error running script: {str(e)}")
 
 @app.post("/api/bots/{bot_id}/repair", response_model=BotResponse)
 async def repair_bot(bot_id, background_tasks):
