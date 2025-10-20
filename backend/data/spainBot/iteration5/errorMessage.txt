@@ -1,0 +1,16 @@
+[tracking] Locator.inner_text failed: Locator.inner_text: Unexpected token ":" while parsing css selector "following-sibling::tr[1]//td". Did you mean to CSS.escape it?
+Call log:
+  - waiting for //th[contains(@class,"infobox-header") and contains(., "Population")] >> following-sibling::tr[1]//td
+
+Exception: Error: Locator.inner_text: Unexpected token ":" while parsing css selector "following-sibling::tr[1]//td". Did you mean to CSS.escape it?
+Call log:
+  - waiting for //th[contains(@class,"infobox-header") and contains(., "Population")] >> following-sibling::tr[1]//td
+
+Traceback (last {MAX_TRACEBACK_LENGTH} frame(s)):
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_frame.py", line 695, in inner_text
+    return await self._channel.send(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+  File "C:\Users\ryafox\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+
