@@ -42,11 +42,11 @@ async def main():
             description   = data.get("description", "")
             amount_str    = data.get("claim amount", "").replace("£", "").replace(",", "")
             claim_amount  = float(amount_str) if amount_str else 0.0
-            date_str      = data.get("claim date", "")          # e.g., "31/01/2025"
+            date_str      = data.get("claim date", "")          # e.g., "29/04/2024"
 
-            # Convert date to ISO format required by <input type="date">
+            # Convert to ISO format expected by <input type="date">
             day, month, year = date_str.split("/")
-            iso_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"  # "2025-01-31"
+            iso_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
 
             # 4️⃣ Navigate to the new‑claim form page
             await page_3003.goto("http://localhost:3003/")

@@ -62,7 +62,7 @@ function App() {
             let outputs;
         
             while (attempts < maxAttempts) {
-                await new Promise(resolve => setTimeout(resolve, 500)); 
+                await new Promise(resolve => setTimeout(resolve, 1000)); 
                 console.log(`Checking for script completion (attempt ${attempts + 1}/${maxAttempts})`);
                 
                 outputs = await getBotOutputs(botId);
@@ -83,7 +83,7 @@ function App() {
             console.warn("Script execution timed out");
             setScriptOutputs({
                 output: outputs?.output || "No output received",
-                error: "Script execution timed out (30s)"
+                error: "Script execution timed out"
             });
 
         } catch (error) {
@@ -186,8 +186,7 @@ function App() {
                         isRepairing={isRepairing}
                     />
                     
-                    <div className="flex-1 min-w-[300px] bg-white shadow overflow-hidden sm:rounded-lg p-6 flex flex-col">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Script Output</h2>
+                    <div className="flex-1 min-w-[300px] bg-white shadow overflow-hidden sm:rounded-lg p-6">
                         <div className="flex-1">
                             {scriptOutputs && (
                                 <ScriptOutput 
@@ -199,8 +198,11 @@ function App() {
                                 />
                             )}
                             {!scriptOutputs && (
-                                <div className="bg-gray-50 p-4 rounded-md h-full flex items-center justify-center text-gray-400">
-                                    Run the script to see output
+                                <div>
+                                    <h2 className="text-lg font-medium text-gray-900 mb-4">Script Output</h2>
+                                    <div className="bg-gray-50 p-4 rounded-md h-full flex items-center justify-center text-gray-400">
+                                        Run the script to see output
+                                    </div>
                                 </div>
                             )}
                         </div>

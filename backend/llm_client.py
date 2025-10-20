@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class LLMClient:
     def __init__(self):
         self.base_url = config["INFERENCE_SERVER_URL"]
-        self.model_name = configs ["MODEL_NAME_OPENAI"]
+        self.model_name = config ["MODEL_NAME_OPENAI"]
         # self.model_name = config["MODEL_NAME_GEMMA"]
         # self.model_name = config["MODEL_NAME_GEMMA_LOW"]
 

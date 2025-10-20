@@ -5,344 +5,299 @@ import inspect
 from playwright.async_api import async_playwright, Page, Frame, Locator, ElementHandle, Browser, BrowserContext, BrowserType
 from functools import wraps, lru_cache
 
-# --- Files next to the tracked script ---
-base_dir    = Path(__file__).parent
-output_file = base_dir / "output.txt"
-error_file  = base_dir / "errorMessage.txt"
-html_file   = base_dir / "HTML.txt"
-url_file    = base_dir / "url.txt"
+base_directory = Path(__file__).parent
+output_file = base_directory / "output.txt"
+error_file = base_directory / "errorMessage.txt"
 
-# overwrite logs each run
 sys.stdout = open(output_file, "w", encoding="utf-8")
 sys.stderr = open(error_file, "w", encoding="utf-8")
 
-# --- globals for last-seen handles ---
-_LAST_PAGE = None        # type: Page | None
-_LAST_BROWSER = None     # type: Browser | None
-_SNAPSHOT_DONE = False
-CAP_MS = 10000 
+LAST_PAGE = None
+LAST_BROWSER = None
+IS_SNAPSHOT_TAKEN = False
+IS_SNAPSHOTTING = False
+DEFAULT_TIMEOUT = 5000 
+MAX_TRACEBACK_LENGTH = 3
+EXCLUDED_METHODS = ('expect_event', 'wait_for_event', 'on', 'off', 'route', 'unroute', 'content')
 
-@atexit.register
-def _flush_streams():
-    for s in (sys.stdout, sys.stderr):
-        try:
-            s.flush()
-            s.close()
-        except Exception:
-            pass
+page_content_reference = Page.content
+async def save_one_page(page, page_index):
+    if page.is_closed():
+        return
 
-async def _save_one_page(page: "Page", idx: int | None = None):
-    try:
-        # skip closed pages
-        if hasattr(page, "is_closed") and page.is_closed():
-            return
-    except Exception:
-        pass
+    html = await page_content_reference(page)
+    current_url = getattr(page, "url", "")
 
-    html = await page.content()
-    try:
-        current_url = page.url
-    except Exception:
-        current_url = ""
-
-    html_path = base_dir / f"HTML-{idx}.txt"
-    url_path  = base_dir / f"url-{idx}.txt"
+    html_path = base_directory / f"HTML-{page_index}.txt"
+    url_path = base_directory / f"url-{page_index}.txt"
 
     html_path.write_text(html, encoding="utf-8")
     url_path.write_text(current_url, encoding="utf-8")
 
-async def _enumerate_open_pages(anchor = None):
+async def get_open_pages(first_page):
     pages = []
     seen = set()
 
-    def _add(p):
-        if p is None:
+    def add_page(page):
+        page_id = id(page)
+        if page_id in seen:
             return
-        ident = id(p)
-        if ident in seen:
-            return
-        seen.add(ident)
-        pages.append(p)
+        seen.add(page_id)
+        pages.append(page)
 
-    # 1) anchor first
-    if anchor is not None:
-        _add(anchor)
+    if first_page is not None:
+        add_page(first_page)
         try:
-            ctx = anchor.context
-            for p in getattr(ctx, "pages", []):
-                _add(p)
-            br = getattr(ctx, "browser", None)
-            if br:
-                for c in getattr(br, "contexts", []):
-                    for p in getattr(c, "pages", []):
-                        _add(p)
+            first_page_context = first_page.context
+            for page in getattr(first_page_context, "pages", []):
+                add_page(page)
+            browser = getattr(first_page_context, "browser", None)
+            if browser:
+                for browser_context in getattr(browser, "contexts", []):
+                    for page in getattr(browser_context, "pages", []):
+                        add_page(page)
         except Exception:
             pass
     else:
-        # 2) fall back to last page we saw
-        lp = globals().get("_LAST_PAGE")
-        if lp:
-            return await _enumerate_open_pages(lp)
+        if LAST_PAGE:
+            return await get_open_pages(LAST_PAGE)
 
     return pages
 
-async def _save_all_pages(anchor = None):
-    pages = await _enumerate_open_pages(anchor)
-    if not pages:
+async def save_all_pages(first_page):
+    if IS_SNAPSHOT_TAKEN or IS_SNAPSHOTTING:
         return
-    for i, p in enumerate(pages):
-        await _save_one_page(p, idx=i+1)
-    globals()["_SNAPSHOT_DONE"] = True
+    globals()["IS_SNAPSHOTTING"] = True
+    try:
+        pages = await get_open_pages(first_page)
+        if not pages:
+            return
+        for index, page in enumerate(pages):
+            await save_one_page(page, page_index=index+1)
+        globals()["IS_SNAPSHOT_TAKEN"] = True
+    finally:
+        globals()["IS_SNAPSHOTTING"] = False
 
-async def _page_from(obj):
-    # direct page handle
-    pg = getattr(obj, "page", None)
-    if pg is not None:
-        return pg
-    # Locator → frame → page
-    if isinstance(obj, Locator):
+async def get_page_from_playwright_element(playwright_element):
+    page = getattr(playwright_element, "page", None)
+    if page is not None:
+        return page
+    if isinstance(playwright_element, Locator):
         try:
-            fr = getattr(obj, "frame", None)
-            if fr is not None:
-                return getattr(fr, "page", None)
+            frame = getattr(playwright_element, "frame", None)
+            if frame is not None:
+                return getattr(frame, "page", None)
         except Exception:
             pass
-    # ElementHandle → owner_frame() → page
-    if isinstance(obj, ElementHandle):
+    if isinstance(playwright_element, ElementHandle):
         try:
-            fr = await obj.owner_frame()
-            if fr is not None:
-                return getattr(fr, "page", None)
+            frame = await playwright_element.owner_frame()
+            if frame is not None:
+                return getattr(frame, "page", None)
         except Exception:
             pass
-    # Frame itself
-    if isinstance(obj, Frame):
+    if isinstance(playwright_element, Frame):
         try:
-            return getattr(obj, "page", None)
+            return getattr(playwright_element, "page", None)
         except Exception:
             pass
-    # Fallback to last seen page
-    return globals().get("_LAST_PAGE")
+    return LAST_PAGE
 
 @lru_cache(maxsize=None)
-def _supports_timeout(origin_cls: type, method_name: str) -> bool:
+def check_class_supports_timeout(playwright_class, method_name):
     try:
-        meth = getattr(origin_cls, method_name)
-        sig = inspect.signature(meth)
-        return "timeout" in sig.parameters
+        method = getattr(playwright_class, method_name)
+        signature = inspect.signature(method)
+        return "timeout" in signature.parameters
     except (AttributeError, ValueError, TypeError):
-        # Some builtins / C-accelerated callables may not expose a signature cleanly
         return False
 
-def _cap_timeout(kwargs: dict, allow: bool):
+def limit_timeout_value(keyword_arguments, allow):
     if not allow:
         return
-    user = kwargs.get("timeout", None)
-    if user is None or (isinstance(user, (int, float)) and user > CAP_MS):
-        kwargs["timeout"] = CAP_MS
+    timeout = keyword_arguments.get("timeout", None)
+    if timeout is None or (isinstance(timeout, (int, float)) and timeout > DEFAULT_TIMEOUT):
+        keyword_arguments["timeout"] = DEFAULT_TIMEOUT
 
-# --- generic async method wrapper factory ---
-def _make_async_wrapper(name, origin_cls):
-    orig = getattr(origin_cls, name)
+def create_async_method_wrapper(method_name, playwright_class):
+    method = getattr(playwright_class, method_name)
 
-    @wraps(orig)
-    async def _wrapped(self, *args, **kwargs):
+    @wraps(method)
+    async def wrapper_function(self, *args, **kwargs):
         if isinstance(self, Page):
-            globals()["_LAST_PAGE"] = self
+            globals()["LAST_PAGE"] = self
 
-        # Only inject 'timeout' if the method supports it
-        _cap_timeout(kwargs, _supports_timeout(origin_cls, name))
+        supports_timeout = check_class_supports_timeout(playwright_class, method_name)
+        limit_timeout_value(kwargs, supports_timeout)
 
         try:
-            return await orig(self, *args, **kwargs)
-        except Exception as e:
+            return await method(self, *args, **kwargs)
+        except Exception as error:
             try:
-                pg = await _page_from(self)
-                if pg is not None:
-                    await _save_all_pages(pg)
+                if not IS_SNAPSHOT_TAKEN and not IS_SNAPSHOTTING:
+                    page = await get_page_from_playwright_element(self)
+                    await save_all_pages(page)
             finally:
-                print(f"[tracking] {origin_cls.__name__}.{name} failed: {e}", file=sys.stderr)
+                print(f"[tracking] {playwright_class.__name__}.{method_name} failed: {error}", file=sys.stderr)
             raise
-    return _wrapped
+    
+    return wrapper_function
 
-# --- auto-wrap all coroutine methods on target classes (skip dangerous ones) ---
-_BLACKLIST = {
-    # dunders / core internals
-    "__class__", "__dict__", "__getattribute__", "__init__", "__repr__", "__str__",
-    "__aenter__", "__aexit__",
-    # event/routing setup where side-effects/timeouts can break semantics
-    "expect_event", "wait_for_event", "on", "off", "route", "unroute",
-}
-
-def _auto_wrap_async_methods(origin_cls):
-    for name in dir(origin_cls):
-        if name in _BLACKLIST or name.startswith("_"):
+def wrap_async_methods(playwright_class):
+    for name in dir(playwright_class):
+        if name in EXCLUDED_METHODS or name.startswith("_"):
             continue
         try:
-            attr = getattr(origin_cls, name)
+            method = getattr(playwright_class, name)
         except Exception:
             continue
-        # wrap only coroutine functions (async defs). Skip properties/descriptors.
-        if inspect.iscoroutinefunction(attr):
-            sentinel = f"__tracked_wrapped_{name}__"
-            if getattr(origin_cls, sentinel, False):
+        if inspect.iscoroutinefunction(method):
+            tracker_added = f"__tracker_wrapped_{name}__"
+            if getattr(playwright_class, tracker_added, False):
                 continue
             try:
-                setattr(origin_cls, name, _make_async_wrapper(name, origin_cls))
-                setattr(origin_cls, sentinel, True)
+                setattr(playwright_class, name, create_async_method_wrapper(name, playwright_class))
+                setattr(playwright_class, tracker_added, True)
             except Exception:
-                # Some C-accelerated attributes are not settable; skip gracefully
                 pass
 
-# Apply broadly
-for _cls in (Page, Frame, Locator, ElementHandle, BrowserContext, Browser):
-    _auto_wrap_async_methods(_cls)
+for playwright_class in (Page, Frame, Locator, ElementHandle, BrowserContext, Browser):
+    wrap_async_methods(playwright_class)
 
-# --- additionally wrap sync selector factories (parse-time errors) ---
-def _wrap_sync_selector_factory(name: str):
-    orig = getattr(Page, name)
-    @wraps(orig)
-    def _wrapped(self: "Page", *args, **kwargs):
-        globals()["_LAST_PAGE"] = self
+def create_sync_selector_wrapper(method_name):
+    method = getattr(Page, method_name)
+    @wraps(method)
+    def wrapper_function(self, *args, **kwargs):
+        globals()["LAST_PAGE"] = self
         try:
-            return orig(self, *args, **kwargs)
-        except Exception as e:
-            # snapshot even though we're in sync context
+            return method(self, *args, **kwargs)
+        except Exception as error:
             try:
-                loop = asyncio.get_running_loop()
-                loop.create_task(_save_all_pages(self))
+                if not IS_SNAPSHOT_TAKEN and not IS_SNAPSHOTTING:
+                    loop = asyncio.get_running_loop()
+                    loop.create_task(save_all_pages(self))
             except RuntimeError:
-                with contextlib.suppress(Exception):
-                    asyncio.run(_save_all_pages(self))
-            print(f"[tracking] Page.{name} failed (sync): {e}", file=sys.stderr)
+                if not IS_SNAPSHOT_TAKEN and not IS_SNAPSHOTTING:
+                    with contextlib.suppress(Exception):
+                        asyncio.run(save_all_pages(self))
+            print(f"[tracking] Page.{method_name} failed (sync): {error}", file=sys.stderr)
             raise
-    return _wrapped
+    return wrapper_function
 
-for _name in ("locator", "get_by_role", "get_by_text", "get_by_label", "frame_locator"):
-    if hasattr(Page, _name):
+for method_name in ("locator", "get_by_role", "get_by_text", "get_by_label", "frame_locator"):
+    if hasattr(Page, method_name):
         try:
-            setattr(Page, _name, _wrap_sync_selector_factory(_name))
+            setattr(Page, method_name, create_sync_selector_wrapper(method_name))
         except Exception:
             pass
 
-
-_TB_TAIL = 3  # print last 3 frames
-
-def _format_tail_tb(exc: BaseException, tail: int) -> str:
+def format_traceback(exception, traceback_tail):
     try:
-        frames = list(traceback.walk_tb(exc.__traceback__))  # oldest → newest
-        tail_frames = frames[-tail:] if tail > 0 else frames
+        frames = list(traceback.walk_tb(exception.__traceback__)) 
+        tail_frames = frames[-traceback_tail:] if traceback_tail > 0 else frames
         stack = traceback.StackSummary.extract(tail_frames)
         return "".join(stack.format())
     except Exception:
-        return "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        return "".join(traceback.format_exception(type(exception), exception, exception.__traceback__))
 
-def _excepthook(etype, value, tb):
-    # Try to snapshot synchronously first (so it happens before the loop is closed)
-    lp = globals().get("_LAST_PAGE")
-    if lp is not None and not globals().get("_SNAPSHOT_DONE", False):
+def exception_hook(exception_type, exception_value, exception_traceback):
+    if LAST_PAGE is not None and not IS_SNAPSHOT_TAKEN and not IS_SNAPSHOTTING:
         try:
-            asyncio.run(_save_all_pages(lp))
+            asyncio.run(save_all_pages(LAST_PAGE))
         except RuntimeError:
-            # If a loop is currently running, schedule as a last resort
             try:
                 loop = asyncio.get_running_loop()
-                loop.create_task(_save_all_pages(lp))
+                loop.create_task(save_all_pages(LAST_PAGE))
             except Exception:
                 pass
 
-    # ... keep your concise header + tail-frames printing below ...
     try:
-        print(f"Exception: {etype.__name__}: {value}", file=sys.stderr)
-        print("Traceback (last 3 frame(s)):", file=sys.stderr)
-        print(_format_tail_tb(value, _TB_TAIL), file=sys.stderr)
+        print(f"Exception: {exception_type.__name__}: {exception_value}", file=sys.stderr)
+        print("Traceback (last {MAX_TRACEBACK_LENGTH} frame(s)):", file=sys.stderr)
+        print(format_traceback(exception_value, MAX_TRACEBACK_LENGTH), file=sys.stderr)
         sys.stderr.flush()
     except Exception:
-        traceback.print_exception(etype, value, tb, file=sys.stderr)
+        traceback.print_exception(exception_type, exception_value, exception_traceback, file=sys.stderr)
 
-sys.excepthook = _excepthook
+sys.excepthook = exception_hook
 
-_orig_asyncio_run = asyncio.run
-def _tracked_asyncio_run(coro, *args, **kwargs):
+asyncio_run_reference = asyncio.run
+def asyncio_run_tracking(coroutine, *args, **kwargs):
     try:
-        return _orig_asyncio_run(coro, *args, **kwargs)
+        return asyncio_run_reference(coroutine, *args, **kwargs)
     except Exception:
-        lp = globals().get("_LAST_PAGE")
-        if lp is not None and not globals().get("_SNAPSHOT_DONE", False):
+        if LAST_PAGE is not None and not IS_SNAPSHOT_TAKEN and not IS_SNAPSHOTTING:
             try:
-                _orig_asyncio_run(_save_all_pages(lp))  # run on a fresh loop
+                asyncio_run_reference(save_all_pages(LAST_PAGE))
             except Exception:
                 pass
         raise
-asyncio.run = _tracked_asyncio_run
+asyncio.run = asyncio_run_tracking
 
-# --- Force headed + set default timeouts; also track last browser/page ---
-_orig_launch = BrowserType.launch
-async def _launch_headed(self, *args, **kwargs):
+browser_launch_reference = BrowserType.launch
+async def launch_playwright_headed(self, *args, **kwargs):
     kwargs["headless"] = False
-    browser: Browser = await _orig_launch(self, *args, **kwargs)
-    globals()["_LAST_BROWSER"] = browser
+    browser = await browser_launch_reference(self, *args, **kwargs)
+    globals()["LAST_BROWSER"] = browser
 
-    _orig_new_context = browser.new_context
-    async def _new_context(*aa, **kk):
-        ctx: BrowserContext = await _orig_new_context(*aa, **kk)
-        ctx.set_default_timeout(CAP_MS)
-        ctx.set_default_navigation_timeout(CAP_MS)
-        return ctx
-    browser.new_context = _new_context
+    new_context_reference = browser.new_context
+    async def new_context(*args, **kwargs):
+        context = await new_context_reference(*args, **kwargs)
+        context.set_default_timeout(DEFAULT_TIMEOUT)
+        context.set_default_navigation_timeout(DEFAULT_TIMEOUT)
+        return context
+    browser.new_context = new_context
 
-    _orig_new_page = browser.new_page
-    async def _new_page(*aa, **kk):
-        page = await _orig_new_page(*aa, **kk)
-        page.set_default_timeout(CAP_MS)
-        page.set_default_navigation_timeout(CAP_MS)
-        globals()["_LAST_PAGE"] = page
+    new_page_reference = browser.new_page
+    async def new_page(*args, **kwargs):
+        page = await new_page_reference(*args, **kwargs)
+        page.set_default_timeout(DEFAULT_TIMEOUT)
+        page.set_default_navigation_timeout(DEFAULT_TIMEOUT)
+        globals()["LAST_PAGE"] = page
         return page
-    browser.new_page = _new_page
+    browser.new_page = new_page
 
     return browser
-BrowserType.launch = _launch_headed
+BrowserType.launch = launch_playwright_headed
 
-# --- Save-before-close wrappers ---------------------------------
-_orig_page_close = Page.close
-async def _tracked_page_close(self: "Page", *args, **kwargs):
+page_close_reference = Page.close
+async def page_close_tracking(self, *args, **kwargs):
     try:
-        if not globals().get("_SNAPSHOT_DONE", False) and hasattr(self, "is_closed") and not self.is_closed():
-            await _save_all_pages(self)
+        if not IS_SNAPSHOT_TAKEN and not IS_SNAPSHOTTING and hasattr(self, "is_closed") and not self.is_closed():
+            await save_all_pages(self)
     except Exception:
         pass
-    return await _orig_page_close(self, *args, **kwargs)
-Page.close = _tracked_page_close
+    return await page_close_reference(self, *args, **kwargs)
+Page.close = page_close_tracking
 
-_orig_ctx_close = BrowserContext.close
-async def _tracked_ctx_close(self: "BrowserContext", *args, **kwargs):
+context_close_reference = BrowserContext.close
+async def context_close_tracking(self, *args, **kwargs):
     try:
-        if not globals().get("_SNAPSHOT_DONE", False):
-            for pg in getattr(self, "pages", []):
+        if not IS_SNAPSHOT_TAKEN and not IS_SNAPSHOTTING:
+            for page in getattr(self, "pages", []):
                 try:
-                    if hasattr(pg, "is_closed") and not pg.is_closed():
-                        await _save_all_pages(pg)
+                    if hasattr(page, "is_closed") and not page.is_closed():
+                        await save_all_pages(page)
                         break
                 except Exception:
                     pass
     except Exception:
         pass
-    return await _orig_ctx_close(self, *args, **kwargs)
-BrowserContext.close = _tracked_ctx_close
+    return await context_close_reference(self, *args, **kwargs)
+BrowserContext.close = context_close_tracking
 
-_orig_browser_close = Browser.close
-async def _tracked_browser_close(self: "Browser", *args, **kwargs):
+browser_close_reference = Browser.close
+async def browser_close_tracking(self, *args, **kwargs):
     try:
-        if not globals().get("_SNAPSHOT_DONE", False):
-            lp = globals().get("_LAST_PAGE")
-            if lp is not None and hasattr(lp, "is_closed") and not lp.is_closed():
-                await _save_all_pages(lp)
+        if not IS_SNAPSHOT_TAKEN and not IS_SNAPSHOTTING:
+            if LAST_PAGE and hasattr(LAST_PAGE, "is_closed") and not LAST_PAGE.is_closed():
+                await save_all_pages(LAST_PAGE)
             else:
-                for ctx in getattr(self, "contexts", []):
-                    for pg in getattr(ctx, "pages", []):
+                for context in getattr(self, "contexts", []):
+                    for page in getattr(context, "pages", []):
                         try:
-                            if hasattr(pg, "is_closed") and not pg.is_closed():
-                                await _save_all_pages(pg)
+                            if hasattr(page, "is_closed") and not page.is_closed():
+                                await save_all_pages(page)
                                 raise StopIteration
                         except Exception:
                             pass
@@ -350,28 +305,33 @@ async def _tracked_browser_close(self: "Browser", *args, **kwargs):
         pass
     except Exception:
         pass
-    return await _orig_browser_close(self, *args, **kwargs)
-Browser.close = _tracked_browser_close
+    return await browser_close_reference(self, *args, **kwargs)
+Browser.close = browser_close_tracking
 
 @atexit.register
-def _snapshot_then_close():
-    lp = globals().get("_LAST_PAGE")
-    br = globals().get("_LAST_BROWSER")
-    if lp is not None and not globals().get("_SNAPSHOT_DONE", False):
+def flush_streams_on_exit():
+    for stream in (sys.stdout, sys.stderr):
         try:
-            asyncio.run(_save_all_pages(lp))
-        except Exception:
-            pass
-    if br is not None:
-        try:
-            async def _do_close():
-                with contextlib.suppress(Exception):
-                    await br.close()
-            asyncio.run(_do_close())
+            stream.flush()
+            stream.close()
         except Exception:
             pass
 
-import asyncio
+@atexit.register
+def snapshot_then_close_on_exit():
+    if LAST_PAGE and not IS_SNAPSHOT_TAKEN and not IS_SNAPSHOTTING:
+        try:
+            asyncio.run(save_all_pages(LAST_PAGE))
+        except Exception:
+            pass
+    if LAST_BROWSER:
+        try:
+            async def close_browser():
+                with contextlib.suppress(Exception):
+                    await LAST_BROWSER.close()
+            asyncio.run(close_browser())
+        except Exception:
+            pass
 
 
 async def main():
@@ -415,11 +375,11 @@ async def main():
             description   = data.get("description", "")
             amount_str    = data.get("claim amount", "").replace("£", "").replace(",", "")
             claim_amount  = float(amount_str) if amount_str else 0.0
-            date_str      = data.get("claim date", "")          # e.g., "31/01/2025"
+            date_str      = data.get("claim date", "")          # e.g., "29/04/2024"
 
-            # Convert date to ISO format required by <input type="date">
+            # Convert to ISO format expected by <input type="date">
             day, month, year = date_str.split("/")
-            iso_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"  # "2025-01-31"
+            iso_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
 
             # 4️⃣ Navigate to the new‑claim form page
             await page_3003.goto("http://localhost:3003/")

@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en" class="h-full"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(9) Claim Messages - RPA Claims Processing</title>
+    <title>Claim Messages - RPA Claims Processing</title>
     <link href="/css/styles.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
@@ -18,7 +18,7 @@
                 <div class="space-y-1">
                     <a href="#" class="block px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-700 text-gray-200 hover:text-white transition-colors" data-folder="inbox">
                         Inbox
-                        <span class="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full" id="unread-count">9</span>
+                        <span class="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full" id="unread-count">0</span>
                     </a>
                 </div>
             </div>
@@ -28,108 +28,10 @@
                 <h4 class="text-lg font-semibold">Inbox</h4>
             </div>
             <div class="flex-1 overflow-auto bg-white hidden" id="message-list"><div>
-                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760359076965">
+                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760967301420">
                         <div class="flex justify-between w-full">
                             <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
-                            <span class="text-xs text-gray-500">13/10/2025, 13:37:56</span>
-                        </div>
-                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-659353</h5>
-                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
-
-
-Policy Number: POL-659353 
-
-Description...</p>
-                    </div>
-                
-                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50" id="_1760359076956">
-                        <div class="flex justify-between w-full">
-                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
-                            <span class="text-xs text-gray-500">13/10/2025, 13:37:56</span>
-                        </div>
-                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-119845</h5>
-                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
-
-
-Policy Number: POL-119845 
-
-Description...</p>
-                    </div>
-                
-                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50" id="_1760359076951">
-                        <div class="flex justify-between w-full">
-                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
-                            <span class="text-xs text-gray-500">13/10/2025, 13:37:56</span>
-                        </div>
-                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-214140</h5>
-                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
-
-
-Policy Number: POL-214140 
-
-Description...</p>
-                    </div>
-                
-                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50" id="_1760359076950">
-                        <div class="flex justify-between w-full">
-                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
-                            <span class="text-xs text-gray-500">13/10/2025, 13:37:56</span>
-                        </div>
-                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-783283</h5>
-                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
-
-
-Policy Number: POL-783283 
-
-Description...</p>
-                    </div>
-                
-                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50" id="_1760359076947">
-                        <div class="flex justify-between w-full">
-                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
-                            <span class="text-xs text-gray-500">13/10/2025, 13:37:56</span>
-                        </div>
-                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-567541</h5>
-                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
-
-
-Policy Number: POL-567541 
-
-Description...</p>
-                    </div>
-                
-                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50" id="_1760359076939">
-                        <div class="flex justify-between w-full">
-                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
-                            <span class="text-xs text-gray-500">13/10/2025, 13:37:56</span>
-                        </div>
-                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-659353</h5>
-                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
-
-
-Policy Number: POL-659353 
-
-Description...</p>
-                    </div>
-                
-                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50" id="_1760359076935">
-                        <div class="flex justify-between w-full">
-                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
-                            <span class="text-xs text-gray-500">13/10/2025, 13:37:56</span>
-                        </div>
-                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-528536</h5>
-                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
-
-
-Policy Number: POL-528536 
-
-Description...</p>
-                    </div>
-                
-                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50" id="_1760359076932">
-                        <div class="flex justify-between w-full">
-                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
-                            <span class="text-xs text-gray-500">13/10/2025, 13:37:56</span>
+                            <span class="text-xs text-gray-500">20/10/2025, 14:35:01</span>
                         </div>
                         <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-509717</h5>
                         <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
@@ -140,10 +42,80 @@ Policy Number: POL-509717
 Description...</p>
                     </div>
                 
-                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50" id="_1760359076930">
+                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760967301400">
                         <div class="flex justify-between w-full">
                             <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
-                            <span class="text-xs text-gray-500">13/10/2025, 13:37:56</span>
+                            <span class="text-xs text-gray-500">20/10/2025, 14:35:01</span>
+                        </div>
+                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-499867</h5>
+                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
+
+
+Policy Number: POL-499867 
+
+Description...</p>
+                    </div>
+                
+                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760967301394">
+                        <div class="flex justify-between w-full">
+                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
+                            <span class="text-xs text-gray-500">20/10/2025, 14:35:01</span>
+                        </div>
+                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-783283</h5>
+                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
+
+
+Policy Number: POL-783283 
+
+Description...</p>
+                    </div>
+                
+                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760967300968">
+                        <div class="flex justify-between w-full">
+                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
+                            <span class="text-xs text-gray-500">20/10/2025, 14:35:00</span>
+                        </div>
+                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-528536</h5>
+                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
+
+
+Policy Number: POL-528536 
+
+Description...</p>
+                    </div>
+                
+                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760967300946">
+                        <div class="flex justify-between w-full">
+                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
+                            <span class="text-xs text-gray-500">20/10/2025, 14:35:00</span>
+                        </div>
+                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-119845</h5>
+                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
+
+
+Policy Number: POL-119845 
+
+Description...</p>
+                    </div>
+                
+                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760967300932">
+                        <div class="flex justify-between w-full">
+                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
+                            <span class="text-xs text-gray-500">20/10/2025, 14:35:00</span>
+                        </div>
+                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-659353</h5>
+                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
+
+
+Policy Number: POL-659353 
+
+Description...</p>
+                    </div>
+                
+                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760967300924">
+                        <div class="flex justify-between w-full">
+                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
+                            <span class="text-xs text-gray-500">20/10/2025, 14:35:00</span>
                         </div>
                         <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-887349</h5>
                         <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
@@ -154,16 +126,44 @@ Policy Number: POL-887349
 Description...</p>
                     </div>
                 
-                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-blue-50" id="_1760359076925">
+                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760967300921">
                         <div class="flex justify-between w-full">
                             <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
-                            <span class="text-xs text-gray-500">13/10/2025, 13:37:56</span>
+                            <span class="text-xs text-gray-500">20/10/2025, 14:35:00</span>
                         </div>
-                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-499867</h5>
+                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-214140</h5>
                         <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
 
 
-Policy Number: POL-499867 
+Policy Number: POL-214140 
+
+Description...</p>
+                    </div>
+                
+                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760967300918">
+                        <div class="flex justify-between w-full">
+                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
+                            <span class="text-xs text-gray-500">20/10/2025, 14:35:00</span>
+                        </div>
+                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-567541</h5>
+                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
+
+
+Policy Number: POL-567541 
+
+Description...</p>
+                    </div>
+                
+                    <div class="message-item p-4 hover:bg-gray-50 cursor-pointer bg-white" id="_1760967300895">
+                        <div class="flex justify-between w-full">
+                            <h6 class="text-sm font-medium text-gray-900 mb-1">claim-submission@example.com</h6>
+                            <span class="text-xs text-gray-500">20/10/2025, 14:35:00</span>
+                        </div>
+                        <h5 class="text-base font-semibold text-gray-900 mb-1">New Claim - Policy #POL-659353</h5>
+                        <p class="text-sm text-gray-600 truncate">A new claim has been submitted with the following details:
+
+
+Policy Number: POL-659353 
 
 Description...</p>
                     </div>
@@ -177,14 +177,14 @@ Description...</p>
                 </div>
                 <div class="p-6">
                     <div class="mb-4">
-                        <h4 id="message-subject" class="text-xl font-semibold text-gray-900 mb-2">New Claim - Policy #POL-659353</h4>
+                        <h4 id="message-subject" class="text-xl font-semibold text-gray-900 mb-2">New Claim - Policy #POL-509717</h4>
                         <div class="flex justify-between text-sm text-gray-500">
                             <span id="message-from">From: claim-submission@example.com</span>
-                            <span id="message-date" class="text-gray-400">13/10/2025, 13:37:56</span>
+                            <span id="message-date" class="text-gray-400">20/10/2025, 14:35:01</span>
                         </div>
                     </div>
                     <div class="border-t border-gray-200 pt-4">
-                        <div id="message-body" class="prose max-w-none text-gray-700">A new claim has been submitted with the following details:<br><br><br>Policy Number: POL-659353 <br><br>Description: Vehicle collision damage <br><br>Claim Amount: £79926 <br><br>Claim Date: 31/01/2025 <br><br><br><br>This is an automated notification.</div>
+                        <div id="message-body" class="prose max-w-none text-gray-700">A new claim has been submitted with the following details:<br><br><br>Policy Number: POL-509717 <br><br>Description: Electronic equipment damage <br><br>Claim Amount: £80083 <br><br>Claim Date: 29/04/2024 <br><br><br><br>This is an automated notification.</div>
                     </div>
                 </div>
             </div>

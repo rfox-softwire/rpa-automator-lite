@@ -42,196 +42,7 @@
                                 </th>
                             </tr>
                         </thead>
-                        <tbody id="claimsTableBody" class="bg-white divide-y divide-gray-200"><tr class="hover:bg-gray-50" data-claim-id="claim-1760360646646">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    POL-499867
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div class="truncate max-w-xs">Electronic equipment damage</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    £96203
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    12/12/2023
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Pending
-                    </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760360646646">View</a>
-                </td>
-            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760360646278">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    POL-887349
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div class="truncate max-w-xs">Water damage to property</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    £8589
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    06/01/2025
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Pending
-                    </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760360646278">View</a>
-                </td>
-            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760360643006">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    POL-509717
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div class="truncate max-w-xs">Electronic equipment damage</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    £80083
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    29/04/2024
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Pending
-                    </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760360643006">View</a>
-                </td>
-            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760360642573">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    POL-528536
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div class="truncate max-w-xs">Vehicle collision damage</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    £60036
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    25/05/2024
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Pending
-                    </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760360642573">View</a>
-                </td>
-            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760360640306">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    POL-659353
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div class="truncate max-w-xs">Liability claim</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    £1612
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    14/09/2024
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Pending
-                    </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760360640306">View</a>
-                </td>
-            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760360637134">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    POL-567541
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div class="truncate max-w-xs">Water damage to property</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    £27867
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    28/06/2025
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Pending
-                    </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760360637134">View</a>
-                </td>
-            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760360636754">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    POL-783283
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div class="truncate max-w-xs">Vehicle collision damage</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    £15701
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    25/10/2023
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Pending
-                    </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760360636754">View</a>
-                </td>
-            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760360633565">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    POL-214140
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div class="truncate max-w-xs">Theft of personal belongings</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    £24158
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    14/01/2024
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Pending
-                    </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760360633565">View</a>
-                </td>
-            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760360633230">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    POL-119845
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div class="truncate max-w-xs">Water damage to property</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    £29989
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    11/11/2023
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        Pending
-                    </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760360633230">View</a>
-                </td>
-            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760360629966">
+                        <tbody id="claimsTableBody" class="bg-white divide-y divide-gray-200"><tr class="hover:bg-gray-50" data-claim-id="claim-1760974628734">
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     POL-659353
                 </td>
@@ -250,7 +61,196 @@
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760360629966">View</a>
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760974628734">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760974625529">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-567541
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Water damage to property</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £27867
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    28/06/2025
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760974625529">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760974625178">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-214140
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Theft of personal belongings</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £24158
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    14/01/2024
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760974625178">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760974621891">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-887349
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Water damage to property</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £8589
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    06/01/2025
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760974621891">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760974618570">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-659353
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Liability claim</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £1612
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    14/09/2024
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760974618570">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760974616232">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-119845
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Water damage to property</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £29989
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    11/11/2023
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760974616232">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760974613045">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-528536
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Vehicle collision damage</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £60036
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    25/05/2024
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760974613045">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760974612643">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-783283
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Vehicle collision damage</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £15701
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    25/10/2023
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760974612643">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760974610325">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-499867
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Electronic equipment damage</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £96203
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    12/12/2023
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760974610325">View</a>
+                </td>
+            </tr><tr class="hover:bg-gray-50" data-claim-id="claim-1760974607328">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    POL-509717
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="truncate max-w-xs">Electronic equipment damage</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    £80083
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    29/04/2024
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Pending
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="view-claim text-blue-600 hover:text-blue-900" data-claim-id="claim-1760974607328">View</a>
                 </td>
             </tr></tbody>
                     </table>
